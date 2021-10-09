@@ -22,6 +22,7 @@ import android.content.Context;
 
 import androidx.multidex.MultiDex;
 
+import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtaskdemo.utils.sdkinit.UMengInit;
 import com.xuexiang.xtaskdemo.utils.sdkinit.XBasicLibInit;
 
@@ -42,6 +43,8 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         initLibs();
+
+        TaskLogger.debug(isDebug());
     }
 
     /**

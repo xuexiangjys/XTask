@@ -72,7 +72,9 @@ public final class PriorityUtils {
     }
 
     /**
-     * Print thread stack
+     * 格式化堆栈信息
+     *
+     * @param stackTrace 堆栈信息数组
      */
     public static String formatStackTrace(StackTraceElement[] stackTrace) {
         StringBuilder sb = new StringBuilder();
@@ -82,4 +84,5 @@ public final class PriorityUtils {
         }
         return sb.toString();
     }
+
 }
