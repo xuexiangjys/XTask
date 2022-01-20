@@ -16,6 +16,7 @@ android {
 }
 
 dependencies {
+    compileOnly deps.androidx.appcompat
     api project(':xtask-thread')
 
 }

@@ -15,18 +15,25 @@
  *
  */
 
-package com.xuexiang.xtask.thread.priority;
+package com.xuexiang.xtask.thread.executor;
 
-import com.xuexiang.xtask.thread.ICancelable;
+import com.xuexiang.xtask.logger.TaskLogger;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * 具有优先级排序的Future接口
+ * 记录日志的拒绝策略
  *
  * @author xuexiang
- * @since 2021/10/9 2:31 AM
+ * @since 2021/12/16 2:02 AM
  */
-public interface IPriorityFuture<V> extends IPriorityComparable<IPriority>, Future<V>, ICancelable {
+public class TaskRecordPolicy implements RejectedExecutionHandler {
 
+    private static final String TAG = TaskLogger.getLogTag("RecordPolicy");
+
+    @Override
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        TaskLogger.eTag(TAG, "Runnable task has been rejected! Thread [" + Thread.currentThread().getName() + "], Runnable: " + r + ", ThreadPoolExecutor: " + e);
+    }
 }

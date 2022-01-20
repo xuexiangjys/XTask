@@ -36,8 +36,9 @@ public class MainFragment extends BaseContainerFragment implements ClickUtils.On
 
     @Override
     protected Class[] getPagesClasses() {
-        return new Class[] {
+        return new Class[]{
                 //此处填写fragment
+                TaskFragment.class,
                 TestFragment.class
         };
     }

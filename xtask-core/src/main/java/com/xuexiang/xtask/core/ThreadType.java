@@ -15,15 +15,30 @@
  *
  */
 
-package com.xuexiang.xtask.thread;
+package com.xuexiang.xtask.core;
 
 /**
- * XTask的线程池管理类
+ * 线程执行类型
  *
  * @author xuexiang
- * @since 2021/10/9 2:30 AM
+ * @since 2021/10/27 2:01 AM
  */
-public final class XTaskThreadPool {
+public enum ThreadType {
 
+
+    /**
+     * 主线程（UI线程）
+     */
+    MAIN,
+
+    /**
+     * 异步线程（开子线程）
+     */
+    ASYNC,
+
+    /**
+     * 同步线程（直接执行）
+     */
+    SYNC
 
 }

@@ -88,4 +88,9 @@ public class DefaultPriorityFuture<V> extends FutureTask<V> implements IPriority
                 ", mPriority=" + mPriority +
                 '}';
     }
+
+    @Override
+    public void cancel() {
+        cancel(true);
+    }
 }

@@ -15,18 +15,41 @@
  *
  */
 
-package com.xuexiang.xtask.thread.priority;
-
-import com.xuexiang.xtask.thread.ICancelable;
-
-import java.util.concurrent.Future;
+package com.xuexiang.xtask.core;
 
 /**
- * 具有优先级排序的Future接口
+ * 任务参数信息实现接口
  *
  * @author xuexiang
- * @since 2021/10/9 2:31 AM
+ * @since 2021/10/19 1:44 AM
  */
-public interface IPriorityFuture<V> extends IPriorityComparable<IPriority>, Future<V>, ICancelable {
+public interface ITaskParam extends IDataStore {
 
+    /**
+     * 增加任务路径
+     *
+     * @param path 任务路径
+     */
+    void addPath(String path);
+
+    /**
+     * 获取当前任务执行的路径
+     *
+     * @return 当前任务执行的路径
+     */
+    String getPath();
+
+    /**
+     * 获取数据存储仓库
+     *
+     * @return 数据存储仓库
+     */
+    IDataStore getDataStore();
+
+    /**
+     * 保存数据
+     *
+     * @param iDataStore 数据存储仓库
+     */
+    void saveData(IDataStore iDataStore);
 }

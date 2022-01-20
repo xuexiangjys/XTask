@@ -15,18 +15,40 @@
  *
  */
 
-package com.xuexiang.xtask.thread.priority;
+package com.xuexiang.xtask.core.impl;
 
-import com.xuexiang.xtask.thread.ICancelable;
-
-import java.util.concurrent.Future;
+import com.xuexiang.xtask.core.ITaskStepHandler;
+import com.xuexiang.xtask.core.ITaskStep;
 
 /**
- * 具有优先级排序的Future接口
+ * 抽象任务处理者
  *
  * @author xuexiang
- * @since 2021/10/9 2:31 AM
+ * @since 2021/11/2 1:48 AM
  */
-public interface IPriorityFuture<V> extends IPriorityComparable<IPriority>, Future<V>, ICancelable {
+public class AbstractTaskStepHandler implements ITaskStepHandler {
+    @Override
+    public void beforeTask(ITaskStep step) {
 
+    }
+
+    @Override
+    public void afterTask(ITaskStep step) {
+
+    }
+
+    @Override
+    public boolean accept(ITaskStep step) {
+        return true;
+    }
+
+    @Override
+    public void handleTaskSucceed(ITaskStep step) {
+
+    }
+
+    @Override
+    public void handleTaskFailed(ITaskStep step) {
+
+    }
 }
