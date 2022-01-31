@@ -17,9 +17,7 @@
 
 package com.xuexiang.xtask.thread.priority;
 
-import com.xuexiang.xtask.thread.ICancelable;
-
-import java.util.concurrent.Future;
+import com.xuexiang.xtask.thread.pool.IFuture;
 
 /**
  * 具有优先级排序的Future接口
@@ -27,6 +25,6 @@ import java.util.concurrent.Future;
  * @author xuexiang
  * @since 2021/10/9 2:31 AM
  */
-public interface IPriorityFuture<V> extends IPriorityComparable<IPriority>, Future<V>, ICancelable {
+public interface IPriorityFuture<V> extends IPriorityComparable<IPriority>, IFuture<V> {
 
 }

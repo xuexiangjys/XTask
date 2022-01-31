@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 
-package com.xuexiang.xtask.core;
+package com.xuexiang.xtask.core.param;
 
 import java.util.Map;
 
@@ -53,8 +53,9 @@ public interface IDataStore {
      *
      * @param key   键
      * @param value 值
+     * @return 数据存储仓库
      */
-    void put(String key, Object value);
+    IDataStore put(String key, Object value);
 
     /**
      * 获取目标数据
@@ -131,5 +132,10 @@ public interface IDataStore {
      * @return 存储信息
      */
     Map<String, Object> getData();
+
+    /**
+     * 清除数据
+     */
+    void clear();
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 
-package com.xuexiang.xtask.core;
+package com.xuexiang.xtask.core.param;
 
 /**
  * 任务执行结果
@@ -24,6 +24,16 @@ package com.xuexiang.xtask.core;
  * @since 2021/10/27 2:10 AM
  */
 public interface ITaskResult {
+
+    /**
+     * 任务成功
+     */
+    int SUCCESS = 0;
+
+    /**
+     * 任务失败
+     */
+    int ERROR = -1;
 
     /**
      * 获取任务结果码
@@ -55,10 +65,31 @@ public interface ITaskResult {
     void saveResult(ITaskResult taskResult);
 
     /**
+     * 更新参数
+     *
+     * @param taskParam 任务参数
+     */
+    void updateParam(ITaskParam taskParam);
+
+    /**
      * 获取数据存储仓库
      *
      * @return 数据存储仓库
      */
     IDataStore getDataStore();
+
+    /**
+     * 获取当前任务执行的全路径
+     *
+     * @return 当前任务执行的全路径
+     */
+    String getPath();
+
+    /**
+     * 获取详细信息
+     *
+     * @return 详细信息
+     */
+    String getDetailMessage();
 
 }

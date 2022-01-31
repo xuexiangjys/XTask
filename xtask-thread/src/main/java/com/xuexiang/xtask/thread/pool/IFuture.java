@@ -15,18 +15,16 @@
  *
  */
 
-package com.xuexiang.xtask.thread.executor;
+package com.xuexiang.xtask.thread.pool;
+
+import java.util.concurrent.Future;
 
 /**
- * 执行者内核实现接口
+ * 可直接取消任务的Future接口
  *
  * @author xuexiang
- * @since 1/26/22 2:25 AM
+ * @since 1/25/22 2:04 AM
  */
-public interface IExecutorCore {
+public interface IFuture<T> extends Future<T>, ICancelable {
 
-    /**
-     * 停止工作
-     */
-    void shutdown();
 }

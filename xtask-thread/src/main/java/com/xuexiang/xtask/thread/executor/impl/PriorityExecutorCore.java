@@ -17,47 +17,35 @@
 
 package com.xuexiang.xtask.thread.executor.impl;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.xuexiang.xtask.thread.ICancelable;
 import com.xuexiang.xtask.thread.executor.IExecutorCore;
-import com.xuexiang.xtask.thread.executor.PriorityThreadPoolExecutor;
-import com.xuexiang.xtask.thread.executor.TaskThreadFactory;
-import com.xuexiang.xtask.thread.priority.IPriorityFuture;
+import com.xuexiang.xtask.thread.executor.IPriorityExecutorCore;
+import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.PriorityThreadPoolExecutor;
+import com.xuexiang.xtask.thread.pool.TaskThreadFactory;
 import com.xuexiang.xtask.thread.utils.ExecutorUtils;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
- * 默认线程执行内核实现
+ * 使用PriorityThreadPoolExecutor实现的线程执行内核，通过阻塞队列(PriorityBlockingQueue)来实现优先级的控制。
  *
  * @author xuexiang
  * @since 2021/11/10 1:17 AM
  */
-public class DefaultExecutorCore implements IExecutorCore {
+public class PriorityExecutorCore implements IPriorityExecutorCore, IExecutorCore {
 
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));
-    private static final int KEEP_ALIVE_SECONDS = 30;
+    private static final int GROUP_CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));
     private static final String GROUP_FACTORY_NAME_PREFIX = "PriorityGroup-";
 
     private PriorityThreadPoolExecutor mExecutor;
 
     private Map<String, PriorityThreadPoolExecutor> mGroupExecutorMap = new ConcurrentHashMap<>();
-
-    /**
-     * 主线程handler
-     */
-    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     @Override
     public ICancelable submit(Runnable task, int priority) {
@@ -67,11 +55,6 @@ public class DefaultExecutorCore implements IExecutorCore {
     @Override
     public ICancelable submit(String groupName, Runnable task, int priority) {
         return submitTask(getThreadPoolExecutor(groupName), task, priority);
-    }
-
-    @Override
-    public boolean postToMain(Runnable task) {
-        return mMainHandler.post(task);
     }
 
     @Override
@@ -110,7 +93,7 @@ public class DefaultExecutorCore implements IExecutorCore {
         } else {
             PriorityThreadPoolExecutor executor = mGroupExecutorMap.get(groupName);
             if (executor == null) {
-                executor = PriorityThreadPoolExecutor.newBuilder(CORE_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS)
+                executor = PriorityThreadPoolExecutor.newBuilder(GROUP_CORE_POOL_SIZE)
                         .setThreadFactory(TaskThreadFactory.getFactory(GROUP_FACTORY_NAME_PREFIX + groupName))
                         .build();
                 mGroupExecutorMap.put(groupName, executor);

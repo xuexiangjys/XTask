@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  *
  */
 
-package com.xuexiang.xtask.core.impl;
+package com.xuexiang.xtask.core.param.impl;
 
-import com.xuexiang.xtask.core.IDataStore;
-import com.xuexiang.xtask.core.ITaskParam;
+import com.xuexiang.xtask.core.param.IDataStore;
+import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.logger.TaskLogger;
-import com.xuexiang.xtask.utils.TaskUtils;
+import com.xuexiang.xtask.utils.CommonUtils;
 
 import java.util.Map;
 
 /**
- * 任务参数信息
+ * 任务参数信息[数据+任务路径]
  *
  * @author xuexiang
  * @since 2021/10/26 1:36 AM
@@ -47,7 +47,29 @@ public class TaskParam implements ITaskParam {
     /**
      * 任务执行路径
      */
-    private final StringBuilder mPath = new StringBuilder();
+    private StringBuilder mPath = new StringBuilder();
+
+    /**
+     * 构建一个空的任务参数
+     *
+     * @return 任务参数
+     */
+    public static TaskParam get() {
+        return new TaskParam();
+    }
+
+    /**
+     * 构建一个任务参数
+     *
+     * @param key   键
+     * @param value 值
+     * @return 任务参数
+     */
+    public static TaskParam get(String key, Object value) {
+        TaskParam taskParam = new TaskParam();
+        taskParam.put(key, value);
+        return taskParam;
+    }
 
     @Override
     public void addPath(String path) {
@@ -60,14 +82,22 @@ public class TaskParam implements ITaskParam {
     }
 
     @Override
+    public void updatePath(String path) {
+        mPath = new StringBuilder(path);
+    }
+
+    @Override
     public IDataStore getDataStore() {
         return mDataStore;
     }
 
     @Override
-    public void saveData(IDataStore iDataStore) {
-        if (iDataStore == null || TaskUtils.isEmpty(iDataStore.getData())) {
-            TaskLogger.wTag(TAG, "saveData ignore, iDataStore is null or data is empty!");
+    public void updateData(IDataStore iDataStore) {
+        if (iDataStore == null) {
+            TaskLogger.wTag(TAG, "updateData ignore, iDataStore is null!");
+            return;
+        }
+        if (CommonUtils.isEmpty(iDataStore.getData())) {
             return;
         }
         for (Map.Entry<String, Object> entry : iDataStore.getData().entrySet()) {
@@ -76,13 +106,29 @@ public class TaskParam implements ITaskParam {
     }
 
     @Override
+    public void updateParam(String path, IDataStore iDataStore) {
+        updatePath(path);
+        updateData(iDataStore);
+    }
+
+    @Override
+    public void updateParam(ITaskParam taskParam) {
+        if (taskParam == null) {
+            TaskLogger.wTag(TAG, "updateParam ignore, taskParam is null!");
+            return;
+        }
+        updateParam(taskParam.getPath(), taskParam.getDataStore());
+    }
+
+    @Override
     public Object get(String key) {
         return mDataStore.get(key);
     }
 
     @Override
-    public void put(String key, Object value) {
+    public TaskParam put(String key, Object value) {
         mDataStore.put(key, value);
+        return this;
     }
 
     @Override
@@ -128,5 +174,11 @@ public class TaskParam implements ITaskParam {
     @Override
     public Map<String, Object> getData() {
         return mDataStore.getData();
+    }
+
+    @Override
+    public void clear() {
+        mDataStore.clear();
+        mPath.delete(0, mPath.length());
     }
 }

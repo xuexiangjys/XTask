@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 
-package com.xuexiang.xtask.core;
+package com.xuexiang.xtask.core.param;
 
 /**
  * 任务参数信息实现接口
@@ -33,11 +33,18 @@ public interface ITaskParam extends IDataStore {
     void addPath(String path);
 
     /**
-     * 获取当前任务执行的路径
+     * 获取当前任务执行的全路径
      *
-     * @return 当前任务执行的路径
+     * @return 当前任务执行的全路径
      */
     String getPath();
+
+    /**
+     * 更新路径
+     *
+     * @param path 任务全路径
+     */
+    void updatePath(String path);
 
     /**
      * 获取数据存储仓库
@@ -47,9 +54,25 @@ public interface ITaskParam extends IDataStore {
     IDataStore getDataStore();
 
     /**
-     * 保存数据
+     * 更新数据
      *
      * @param iDataStore 数据存储仓库
      */
-    void saveData(IDataStore iDataStore);
+    void updateData(IDataStore iDataStore);
+
+    /**
+     * 更新参数
+     *
+     * @param path       任务全路径
+     * @param iDataStore 数据存储仓库
+     */
+    void updateParam(String path, IDataStore iDataStore);
+
+    /**
+     * 更新参数
+     *
+     * @param taskParam 任务参数
+     */
+    void updateParam(ITaskParam taskParam);
+
 }

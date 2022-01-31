@@ -17,11 +17,9 @@
 
 package com.xuexiang.xtask.core;
 
-import androidx.annotation.NonNull;
-
-import com.xuexiang.xtask.thread.ICancelable;
-
-import java.util.List;
+import com.xuexiang.xtask.core.step.IGroupTaskStep;
+import com.xuexiang.xtask.core.step.ITaskStepLifecycle;
+import com.xuexiang.xtask.thread.pool.ICancelable;
 
 /**
  * 任务链执行引擎实现接口
@@ -29,7 +27,7 @@ import java.util.List;
  * @author xuexiang
  * @since 2021/10/19 1:43 AM
  */
-public interface ITaskChainEngine extends ICancelable {
+public interface ITaskChainEngine extends ITaskStepLifecycle, IGroupTaskStep, ICancelable {
 
     /**
      * 获取任务链的名称
@@ -47,40 +45,18 @@ public interface ITaskChainEngine extends ICancelable {
     ITaskChainEngine setTaskChainCallback(ITaskChainCallback iTaskChainCallback);
 
     /**
-     * 增加执行任务
-     *
-     * @param taskStep 执行任务
-     * @return 任务链执行引擎
-     */
-    ITaskChainEngine addTask(ITaskStep taskStep);
-
-    /**
-     * 增加执行任务集合
-     *
-     * @param taskStepList 执行任务集合
-     * @return 任务链执行引擎
-     */
-    ITaskChainEngine addTasks(List<ITaskStep> taskStepList);
-
-    /**
      * 开始任务
      */
     void start();
 
     /**
-     * 任务步骤执行完毕
-     *
-     * @param step   任务步骤
-     * @param result 任务执行结果
+     * 重置任务链（可继续使用)
      */
-    void onTaskStepCompleted(@NonNull ITaskStep step, @NonNull ITaskResult result);
+    void reset();
 
     /**
-     * 任务步骤执行发生异常
-     *
-     * @param step   任务步骤
-     * @param result 任务执行结果
+     * 销毁任务链（不可使用)
      */
-    void onTaskStepError(@NonNull ITaskStep step, @NonNull ITaskResult result);
+    void destroy();
 
 }

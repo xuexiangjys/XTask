@@ -15,18 +15,33 @@
  *
  */
 
-package com.xuexiang.xtask.thread.executor;
+package com.xuexiang.xtask.core.step;
+
+import androidx.annotation.NonNull;
+
+import com.xuexiang.xtask.core.param.ITaskResult;
 
 /**
- * 执行者内核实现接口
+ * 任务步骤的生命周期管理
  *
  * @author xuexiang
- * @since 1/26/22 2:25 AM
+ * @since 1/30/22 4:51 PM
  */
-public interface IExecutorCore {
+public interface ITaskStepLifecycle {
 
     /**
-     * 停止工作
+     * 任务步骤执行完毕
+     *
+     * @param step   任务步骤
+     * @param result 任务执行结果
      */
-    void shutdown();
+    void onTaskStepCompleted(@NonNull ITaskStep step, @NonNull ITaskResult result);
+
+    /**
+     * 任务步骤执行发生异常
+     *
+     * @param step   任务步骤
+     * @param result 任务执行结果
+     */
+    void onTaskStepError(@NonNull ITaskStep step, @NonNull ITaskResult result);
 }

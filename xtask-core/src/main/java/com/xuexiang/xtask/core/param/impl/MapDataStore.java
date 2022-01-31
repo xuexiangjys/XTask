@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  *
  */
 
-package com.xuexiang.xtask.core.impl;
+package com.xuexiang.xtask.core.param.impl;
 
-import com.xuexiang.xtask.core.IDataStore;
+import com.xuexiang.xtask.core.param.IDataStore;
 import com.xuexiang.xtask.logger.TaskLogger;
-import com.xuexiang.xtask.utils.TaskUtils;
+import com.xuexiang.xtask.utils.CommonUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,12 +49,12 @@ public class MapDataStore implements IDataStore {
 
     @Override
     public <T> T getObject(String key, Class<T> clazz) {
-        return TaskUtils.cast(get(key), clazz);
+        return CommonUtils.cast(get(key), clazz);
     }
 
     @Override
     public <T> T getObject(String key, T defaultValue) {
-        return TaskUtils.cast(get(key), defaultValue);
+        return CommonUtils.cast(get(key), defaultValue);
     }
 
     @Override
@@ -96,11 +96,17 @@ public class MapDataStore implements IDataStore {
     }
 
     @Override
-    public void put(String key, Object value) {
+    public void clear() {
+        mData.clear();
+    }
+
+    @Override
+    public MapDataStore put(String key, Object value) {
         if (key == null || value == null) {
             TaskLogger.eTag(TAG, "put param error, key or value is null!");
-            return;
+            return this;
         }
         mData.put(key, value);
+        return this;
     }
 }

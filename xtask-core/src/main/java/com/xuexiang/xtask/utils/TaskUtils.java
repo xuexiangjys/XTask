@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
 
 package com.xuexiang.xtask.utils;
 
-import com.xuexiang.xtask.core.ITaskStep;
 import com.xuexiang.xtask.core.ThreadType;
+import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.logger.TaskLogger;
+import com.xuexiang.xtask.thread.XTaskExecutor;
+import com.xuexiang.xtask.thread.pool.ICancelable;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * XTask内部工具类
  *
  * @author xuexiang
- * @since 2021/10/26 1:47 AM
+ * @since 1/31/22 8:40 PM
  */
 public final class TaskUtils {
 
@@ -40,56 +40,6 @@ public final class TaskUtils {
     }
 
     /**
-     * 类型强转
-     *
-     * @param object 需要强转的对象
-     * @param clazz  需要强转的类型
-     * @param <T>
-     * @return 类型强转结果
-     */
-    public static <T> T cast(final Object object, Class<T> clazz) {
-        return clazz != null && clazz.isInstance(object) ? (T) object : null;
-    }
-
-    /**
-     * 类型强转
-     *
-     * @param object       需要强转的对象
-     * @param defaultValue 强转的默认值
-     * @param <T>
-     * @return 类型强转结果
-     */
-    public static <T> T cast(Object object, T defaultValue) {
-        if (defaultValue == null) {
-            return null;
-        } else if (object == null) {
-            return null;
-        } else {
-            return defaultValue.getClass() == object.getClass() ? (T) object : defaultValue;
-        }
-    }
-
-    /**
-     * 集合是否为空
-     *
-     * @param collection 集合
-     * @return true: 为空，false：不为空
-     */
-    public static <E> boolean isEmpty(final Collection<E> collection) {
-        return collection == null || collection.isEmpty();
-    }
-
-    /**
-     * Map是否为空
-     *
-     * @param obj Map
-     * @return true: 为空，false：不为空
-     */
-    public static boolean isEmpty(final Map obj) {
-        return obj == null || obj.isEmpty();
-    }
-
-    /**
      * 查找下一条需要执行的任务
      *
      * @param taskStepList 执行任务集合
@@ -97,7 +47,7 @@ public final class TaskUtils {
      * @return 下一条执行任务
      */
     public static ITaskStep findNextTaskStep(List<ITaskStep> taskStepList, ITaskStep taskStep) {
-        if (isEmpty(taskStepList)) {
+        if (CommonUtils.isEmpty(taskStepList)) {
             return null;
         }
         int index = 0;
@@ -117,20 +67,28 @@ public final class TaskUtils {
      * 执行任务
      *
      * @param taskStep 需要执行的任务
+     * @return 取消接口
      */
-    public static void executeTask(ITaskStep taskStep) {
+    public static ICancelable executeTask(ITaskStep taskStep) {
         if (taskStep == null) {
             TaskLogger.eTag(TAG, "execute task failed, taskStep is null!");
-            return;
+            return null;
         }
         ThreadType type = taskStep.getThreadType();
         if (type == ThreadType.MAIN) {
-
+            XTaskExecutor.get().postToMain(taskStep);
+            return null;
+        } else if (type == ThreadType.ASYNC_EMERGENT) {
+            return XTaskExecutor.get().emergentSubmit(taskStep);
         } else if (type == ThreadType.ASYNC) {
-
+            return XTaskExecutor.get().submit(taskStep);
+        } else if (type == ThreadType.ASYNC_IO) {
+            return XTaskExecutor.get().ioSubmit(taskStep);
+        } else if (type == ThreadType.ASYNC_BACKGROUND) {
+            return XTaskExecutor.get().backgroundSubmit(taskStep);
         } else {
-
+            taskStep.run();
+            return null;
         }
     }
-
 }

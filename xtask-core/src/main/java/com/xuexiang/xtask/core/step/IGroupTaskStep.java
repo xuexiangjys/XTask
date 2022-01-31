@@ -15,18 +15,36 @@
  *
  */
 
-package com.xuexiang.xtask.thread.executor;
+package com.xuexiang.xtask.core.step;
+
+import java.util.List;
 
 /**
- * 执行者内核实现接口
+ * 组任务步骤
  *
  * @author xuexiang
- * @since 1/26/22 2:25 AM
+ * @since 1/30/22 6:18 PM
  */
-public interface IExecutorCore {
+public interface IGroupTaskStep {
 
     /**
-     * 停止工作
+     * 增加执行任务
+     *
+     * @param taskStep 执行任务
+     * @return 任务链执行引擎
      */
-    void shutdown();
+    IGroupTaskStep addTask(ITaskStep taskStep);
+
+    /**
+     * 增加执行任务集合
+     *
+     * @param taskStepList 执行任务集合
+     * @return 任务链执行引擎
+     */
+    IGroupTaskStep addTasks(List<ITaskStep> taskStepList);
+
+    /**
+     * 清理任务
+     */
+    void clearTask();
 }

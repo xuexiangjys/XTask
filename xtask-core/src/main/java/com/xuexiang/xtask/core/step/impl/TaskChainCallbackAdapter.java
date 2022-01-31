@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,40 +15,37 @@
  *
  */
 
-package com.xuexiang.xtask.core.impl;
+package com.xuexiang.xtask.core.step.impl;
 
-import com.xuexiang.xtask.core.ITaskStepHandler;
-import com.xuexiang.xtask.core.ITaskStep;
+import com.xuexiang.xtask.core.ITaskChainCallback;
+import com.xuexiang.xtask.core.ITaskChainEngine;
+import com.xuexiang.xtask.core.param.ITaskResult;
 
 /**
- * 抽象任务处理者
+ * 任务链执行回调适配器
  *
  * @author xuexiang
- * @since 2021/11/2 1:48 AM
+ * @since 1/31/22 9:11 PM
  */
-public class AbstractTaskStepHandler implements ITaskStepHandler {
+public class TaskChainCallbackAdapter implements ITaskChainCallback {
+
     @Override
-    public void beforeTask(ITaskStep step) {
+    public void onTaskChainStart(ITaskChainEngine engine) {
 
     }
 
     @Override
-    public void afterTask(ITaskStep step) {
+    public void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result) {
 
     }
 
     @Override
-    public boolean accept(ITaskStep step) {
-        return true;
-    }
-
-    @Override
-    public void handleTaskSucceed(ITaskStep step) {
+    public void onTaskChainError(ITaskChainEngine engine, ITaskResult result) {
 
     }
 
     @Override
-    public void handleTaskFailed(ITaskStep step) {
+    public void onTaskChainCancelled(ITaskChainEngine engine) {
 
     }
 }

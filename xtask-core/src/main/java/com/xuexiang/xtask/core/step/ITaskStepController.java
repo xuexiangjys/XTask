@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,46 +15,52 @@
  *
  */
 
-package com.xuexiang.xtask.core;
+package com.xuexiang.xtask.core.step;
 
+import androidx.annotation.NonNull;
+
+import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 
 /**
- * 任务链执行回调
+ * 任务步骤执行控制器
  *
  * @author xuexiang
- * @since 2021/10/18 10:32 PM
+ * @since 1/30/22 6:33 PM
  */
-public interface ITaskChainCallback {
+public interface ITaskStepController {
 
     /**
-     * 任务步骤开始执行
+     * 获取任务步骤名称
      *
-     * @param engine 任务链
+     * @return 任务步骤的名称
      */
-    void onTaskChainStart(ITaskChainEngine engine);
+    String getName();
+
+    /**
+     * 获取任务的参数
+     *
+     * @return 任务参数
+     */
+    @NonNull
+    ITaskParam getTaskParam();
 
     /**
      * 任务步骤执行完毕
      *
-     * @param engine 任务链
      * @param result 任务执行结果
      */
-    void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result);
+    void onTaskSucceed(@NonNull ITaskResult result);
 
     /**
-     * 任务步骤执行发生异常
+     * 任务链执行发生异常
      *
-     * @param engine 任务链
      * @param result 任务执行结果
      */
-    void onTaskChainError(ITaskChainEngine engine, ITaskResult result);
+    void onTaskFailed(@NonNull ITaskResult result);
 
     /**
-     * 任务步骤执行被取消
-     *
-     * @param engine 任务链
+     * 资源释放
      */
-    void onTaskChainCancelled(ITaskChainEngine engine);
-
+    void recycle();
 }

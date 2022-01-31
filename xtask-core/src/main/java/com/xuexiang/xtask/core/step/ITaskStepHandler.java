@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 
-package com.xuexiang.xtask.core;
+package com.xuexiang.xtask.core.step;
 
 /**
  * 任务处理者
@@ -60,5 +60,12 @@ public interface ITaskStepHandler {
      * @param step 任务
      */
     void handleTaskFailed(ITaskStep step);
+
+    /**
+     * 任务执行被取消的处理
+     *
+     * @param step 任务
+     */
+    void handleTaskCancelled(ITaskStep step);
 
 }

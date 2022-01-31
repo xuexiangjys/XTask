@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  *
  */
 
-package com.xuexiang.xtask.core;
+package com.xuexiang.xtask.core.step;
 
-import com.xuexiang.xtask.thread.ICancelable;
+import com.xuexiang.xtask.core.ThreadType;
+import com.xuexiang.xtask.core.param.impl.TaskParam;
+import com.xuexiang.xtask.thread.pool.ICancelable;
 
 /**
  * 任务步骤
@@ -25,14 +27,14 @@ import com.xuexiang.xtask.thread.ICancelable;
  * @author xuexiang
  * @since 2021/10/18 9:11 PM
  */
-public interface ITaskStep extends Runnable, ICancelable {
+public interface ITaskStep extends Runnable, ICancelable, ITaskStepController {
 
     /**
-     * 获取任务步骤名称
+     * 设置任务步骤的生命周期
      *
-     * @return 任务步骤的名称
+     * @param taskStepLifecycle 任务步骤的生命周期
      */
-    String getName();
+    void setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle);
 
     /**
      * 获取执行的线程类型
@@ -42,18 +44,18 @@ public interface ITaskStep extends Runnable, ICancelable {
     ThreadType getThreadType();
 
     /**
-     * 获取任务的参数
-     *
-     * @return 任务参数
-     */
-    ITaskParam getTaskParam();
-
-    /**
      * 是否接收执行
      *
      * @return 是否执行，默认是true
      */
     boolean accept();
+
+    /**
+     * 任务准备工作
+     *
+     * @param taskParam 任务参数
+     */
+    void prepareTask(TaskParam taskParam);
 
     /**
      * 设置任务取消接口
@@ -82,19 +84,5 @@ public interface ITaskStep extends Runnable, ICancelable {
      * @return 是否正在运行
      */
     boolean isRunning();
-
-    /**
-     * 任务步骤执行完毕
-     *
-     * @param result 任务执行结果
-     */
-    void onTaskSucceed(ITaskResult result);
-
-    /**
-     * 任务链执行发生异常
-     *
-     * @param result 任务执行结果
-     */
-    void onTaskFailed(ITaskResult result);
 
 }

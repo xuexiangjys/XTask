@@ -21,7 +21,7 @@ import android.util.Log;
 
 import com.xuexiang.xpage.annotation.Page;
 import com.xuexiang.xtask.thread.priority.IPriority;
-import com.xuexiang.xtask.thread.executor.PriorityThreadPoolExecutor;
+import com.xuexiang.xtask.thread.pool.PriorityThreadPoolExecutor;
 import com.xuexiang.xtaskdemo.core.BaseSimpleListFragment;
 
 import java.util.ArrayList;
@@ -29,9 +29,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 public class TestFragment extends BaseSimpleListFragment {
 
     private static final String TAG = "TestFragment";
-
 
     @Override
     protected List<String> initSimpleData(List<String> lists) {

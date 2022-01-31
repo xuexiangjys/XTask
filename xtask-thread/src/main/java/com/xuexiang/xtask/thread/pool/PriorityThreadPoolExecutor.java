@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 
-package com.xuexiang.xtask.thread.executor;
+package com.xuexiang.xtask.thread.pool;
 
 import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.thread.priority.IPriority;

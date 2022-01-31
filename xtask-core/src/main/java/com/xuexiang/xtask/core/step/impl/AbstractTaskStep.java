@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,19 @@
  *
  */
 
-package com.xuexiang.xtask.core.impl;
+package com.xuexiang.xtask.core.step.impl;
 
-import com.xuexiang.xtask.thread.ICancelable;
-import com.xuexiang.xtask.core.ITaskChainEngine;
-import com.xuexiang.xtask.core.ITaskParam;
-import com.xuexiang.xtask.core.ITaskResult;
-import com.xuexiang.xtask.core.ITaskStep;
-import com.xuexiang.xtask.core.ITaskStepHandler;
+import androidx.annotation.NonNull;
+
 import com.xuexiang.xtask.core.ThreadType;
+import com.xuexiang.xtask.core.param.ITaskParam;
+import com.xuexiang.xtask.core.param.ITaskResult;
+import com.xuexiang.xtask.core.param.impl.TaskParam;
+import com.xuexiang.xtask.core.step.ITaskStep;
+import com.xuexiang.xtask.core.step.ITaskStepHandler;
+import com.xuexiang.xtask.core.step.ITaskStepLifecycle;
 import com.xuexiang.xtask.logger.TaskLogger;
+import com.xuexiang.xtask.thread.pool.ICancelable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,12 +49,12 @@ public abstract class AbstractTaskStep implements ITaskStep {
     /**
      * 是否取消
      */
-    private AtomicBoolean mIsCanceled = new AtomicBoolean(false);
+    private AtomicBoolean mIsCancelled = new AtomicBoolean(false);
 
     /**
-     * 任务链执行引擎
+     * 任务步骤的生命周期管理
      */
-    private ITaskChainEngine mEngine;
+    private ITaskStepLifecycle mTaskStepLifecycle;
     /**
      * 线程执行类型
      */
@@ -59,6 +62,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
     /**
      * 任务参数
      */
+    @NonNull
     private ITaskParam mTaskParam;
     /**
      * 任务处理
@@ -71,28 +75,55 @@ public abstract class AbstractTaskStep implements ITaskStep {
 
     /**
      * 构造方法
-     *
-     * @param engine      任务链执行引擎
-     * @param taskParam   任务参数
-     * @param taskHandler 任务执行处理者
      */
-    public AbstractTaskStep(ITaskChainEngine engine, ITaskParam taskParam, ITaskStepHandler taskHandler) {
-        this(engine, ThreadType.ASYNC, taskParam, taskHandler);
+    public AbstractTaskStep() {
+        this(ThreadType.ASYNC, TaskParam.get(), null);
     }
 
     /**
      * 构造方法
      *
-     * @param engine      任务链执行引擎
+     * @param taskParam 任务参数
+     */
+    public AbstractTaskStep(@NonNull ITaskParam taskParam) {
+        this(ThreadType.ASYNC, taskParam, null);
+    }
+
+    /**
+     * 构造方法
+     *
+     * @param taskHandler 任务执行处理者
+     */
+    public AbstractTaskStep(ITaskStepHandler taskHandler) {
+        this(ThreadType.ASYNC, TaskParam.get(), taskHandler);
+    }
+
+    /**
+     * 构造方法
+     *
+     * @param taskParam   任务参数
+     * @param taskHandler 任务执行处理者
+     */
+    public AbstractTaskStep(@NonNull ITaskParam taskParam, ITaskStepHandler taskHandler) {
+        this(ThreadType.ASYNC, taskParam, taskHandler);
+    }
+
+    /**
+     * 构造方法
+     *
      * @param threadType  线程类型
      * @param taskParam   任务参数
      * @param taskHandler 任务执行处理者
      */
-    public AbstractTaskStep(ITaskChainEngine engine, ThreadType threadType, ITaskParam taskParam, ITaskStepHandler taskHandler) {
-        mEngine = engine;
+    public AbstractTaskStep(ThreadType threadType, @NonNull ITaskParam taskParam, ITaskStepHandler taskHandler) {
         mThreadType = threadType;
         mTaskParam = taskParam;
         mTaskHandler = taskHandler;
+    }
+
+    @Override
+    public void setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle) {
+        mTaskStepLifecycle = taskStepLifecycle;
     }
 
     @Override
@@ -100,6 +131,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
         return mThreadType;
     }
 
+    @NonNull
     @Override
     public ITaskParam getTaskParam() {
         return mTaskParam;
@@ -129,41 +161,75 @@ public abstract class AbstractTaskStep implements ITaskStep {
     }
 
     @Override
-    public void onTaskSucceed(ITaskResult result) {
-        if (mTaskHandler != null) {
-            mTaskHandler.handleTaskSucceed(this);
-        }
-        if (mEngine != null) {
-            mEngine.onTaskStepCompleted(this, result);
-        }
-        mIsRunning.set(false);
+    public void prepareTask(TaskParam taskParam) {
+        mTaskParam.updateParam(taskParam);
     }
 
     @Override
-    public void onTaskFailed(ITaskResult result) {
+    public void onTaskSucceed(@NonNull ITaskResult result) {
+        TaskLogger.dTag(TAG, getTaskLogName() + " succeed!");
+        mIsRunning.set(false);
+        if (mTaskHandler != null) {
+            mTaskHandler.handleTaskSucceed(this);
+        }
+        if (mTaskStepLifecycle != null) {
+            result.updateParam(mTaskParam);
+            mTaskStepLifecycle.onTaskStepCompleted(this, result);
+        }
+    }
+
+    @Override
+    public void onTaskFailed(@NonNull ITaskResult result) {
+        TaskLogger.eTag(TAG, getTaskLogName() + " failed, " + result.getDetailMessage());
+        mIsRunning.set(false);
         if (mTaskHandler != null) {
             mTaskHandler.handleTaskFailed(this);
         }
-        if (mEngine != null) {
-            mEngine.onTaskStepError(this, result);
+        if (mTaskStepLifecycle != null) {
+            result.updateParam(mTaskParam);
+            mTaskStepLifecycle.onTaskStepError(this, result);
         }
-        mIsRunning.set(false);
+    }
+
+    @Override
+    public void recycle() {
+        TaskLogger.dTag(TAG, getTaskLogName() + " recycle...");
+        if (canCancel()) {
+            cancel();
+        }
+        mTaskParam.clear();
+        mTaskStepLifecycle = null;
+        mTaskHandler = null;
+        mCancelable = null;
     }
 
     @Override
     public void cancel() {
-        if (isCancelled() || !isRunning()) {
+        if (!canCancel()) {
             return;
         }
+        TaskLogger.dTag(TAG, getTaskLogName() + " cancel...");
         if (mCancelable != null) {
             mCancelable.cancel();
         }
-        mIsCanceled.set(true);
+        mIsCancelled.set(true);
+        if (mTaskHandler != null) {
+            mTaskHandler.handleTaskCancelled(this);
+        }
+    }
+
+    /**
+     * 是否可以取消
+     *
+     * @return 是否可以取消
+     */
+    private boolean canCancel() {
+        return isRunning() && !isCancelled();
     }
 
     @Override
     public boolean isCancelled() {
-        return mIsCanceled.get();
+        return mIsCancelled.get();
     }
 
     @Override
@@ -178,8 +244,6 @@ public abstract class AbstractTaskStep implements ITaskStep {
         } catch (Exception e) {
             TaskLogger.eTag(TAG, getTaskLogName() + " has error！", e);
         }
-        mTaskParam.addPath(getName());
-        TaskLogger.dTag(TAG, getTaskLogName() + " has run: " + mTaskParam.getPath());
     }
 
     /**
@@ -188,6 +252,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
      * @throws Exception 异常
      */
     protected void processTask() throws Exception {
+        updateProcessTaskPath();
         if (mTaskHandler != null) {
             mTaskHandler.beforeTask(this);
         }
@@ -197,6 +262,14 @@ public abstract class AbstractTaskStep implements ITaskStep {
         if (mTaskHandler != null) {
             mTaskHandler.afterTask(this);
         }
+    }
+
+    /**
+     * 更新任务处理的路径
+     */
+    private void updateProcessTaskPath() {
+        mTaskParam.addPath(getName());
+        TaskLogger.dTag(TAG, getTaskLogName() + " has run, path: " + mTaskParam.getPath());
     }
 
     /**

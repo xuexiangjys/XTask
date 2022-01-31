@@ -15,25 +15,35 @@
  *
  */
 
-package com.xuexiang.xtask.thread;
+package com.xuexiang.xtask.thread.executor;
+
+import com.xuexiang.xtask.thread.pool.ICancelable;
 
 /**
- * 可取消执行的实现接口
+ * 拥有优先级控制的执行者内核实现接口
  *
  * @author xuexiang
- * @since 2021/11/2 12:20 AM
+ * @since 2021/11/10 1:04 AM
  */
-public interface ICancelable {
+public interface IPriorityExecutorCore extends IExecutorCore {
 
     /**
-     * 取消
-     */
-    void cancel();
-
-    /**
-     * 获取是否已取消
+     * 执行异步任务
      *
-     * @return 是否已取消
+     * @param task     任务
+     * @param priority 优先级
+     * @return 取消接口
      */
-    boolean isCancelled();
+    ICancelable submit(Runnable task, int priority);
+
+    /**
+     * 按组执行异步任务
+     *
+     * @param groupName 任务组名
+     * @param task      任务
+     * @param priority  优先级
+     * @return 取消接口
+     */
+    ICancelable submit(String groupName, Runnable task, int priority);
+
 }

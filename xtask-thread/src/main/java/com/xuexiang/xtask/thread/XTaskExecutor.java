@@ -17,8 +17,11 @@
 
 package com.xuexiang.xtask.thread;
 
-import com.xuexiang.xtask.thread.executor.IExecutorCore;
-import com.xuexiang.xtask.thread.executor.impl.DefaultExecutorCore;
+import com.xuexiang.xtask.thread.executor.ICategoryExecutorCore;
+import com.xuexiang.xtask.thread.executor.IPriorityExecutorCore;
+import com.xuexiang.xtask.thread.executor.impl.CategoryExecutorCore;
+import com.xuexiang.xtask.thread.executor.impl.PriorityExecutorCore;
+import com.xuexiang.xtask.thread.pool.ICancelable;
 
 /**
  * XTask的执行者
@@ -26,14 +29,18 @@ import com.xuexiang.xtask.thread.executor.impl.DefaultExecutorCore;
  * @author xuexiang
  * @since 2021/10/9 2:30 AM
  */
-public class XTaskExecutor implements IExecutorCore {
+public class XTaskExecutor implements IPriorityExecutorCore, ICategoryExecutorCore {
 
     private static volatile XTaskExecutor sInstance = null;
 
     /**
-     * 执行内核实现接口
+     * 优先级执行内核实现接口
      */
-    private IExecutorCore mExecutorCore;
+    private IPriorityExecutorCore mPriorityExecutorCore;
+    /**
+     * 分类执行内核实现接口
+     */
+    private ICategoryExecutorCore mCategoryExecutorCore;
 
     /**
      * 获取XTask的执行者
@@ -55,38 +62,76 @@ public class XTaskExecutor implements IExecutorCore {
      * 私有构造方法
      */
     private XTaskExecutor() {
-        mExecutorCore = new DefaultExecutorCore();
+        mCategoryExecutorCore = new CategoryExecutorCore();
+        mPriorityExecutorCore = new PriorityExecutorCore();
     }
 
     /**
-     * 设置执行内核实现接口
+     * 设置优先级控制的执行内核实现接口
      *
-     * @param executorCore 执行内核实现接口
+     * @param priorityExecutorCore 优先级控制的执行内核实现接口
      * @return this
      */
-    public XTaskExecutor setExecutorCore(IExecutorCore executorCore) {
-        mExecutorCore = executorCore;
+    public XTaskExecutor setPriorityExecutorCore(IPriorityExecutorCore priorityExecutorCore) {
+        mPriorityExecutorCore = priorityExecutorCore;
+        return this;
+    }
+
+    /**
+     * 设置类别执行内核实现接口
+     *
+     * @param categoryExecutorCore 类别执行内核实现接口
+     * @return this
+     */
+    public XTaskExecutor setCategoryExecutorCore(ICategoryExecutorCore categoryExecutorCore) {
+        mCategoryExecutorCore = categoryExecutorCore;
         return this;
     }
 
     @Override
     public ICancelable submit(Runnable task, int priority) {
-        return mExecutorCore.submit(task, priority);
+        return mPriorityExecutorCore.submit(task, priority);
     }
 
     @Override
     public ICancelable submit(String groupName, Runnable task, int priority) {
-        return mExecutorCore.submit(groupName, task, priority);
+        return mPriorityExecutorCore.submit(groupName, task, priority);
     }
 
     @Override
     public boolean postToMain(Runnable task) {
-        return mExecutorCore.postToMain(task);
+        return mCategoryExecutorCore.postToMain(task);
     }
 
     @Override
     public void shutdown() {
-        mExecutorCore.shutdown();
+        mCategoryExecutorCore.shutdown();
+        mPriorityExecutorCore.shutdown();
+    }
+
+    @Override
+    public ICancelable emergentSubmit(Runnable task) {
+        return mCategoryExecutorCore.emergentSubmit(task);
+    }
+
+    @Override
+    public ICancelable submit(Runnable task) {
+        return mCategoryExecutorCore.submit(task);
+    }
+
+    @Override
+    public ICancelable backgroundSubmit(Runnable task) {
+        return mCategoryExecutorCore.backgroundSubmit(task);
+    }
+
+    @Override
+    public ICancelable ioSubmit(Runnable task) {
+        return mCategoryExecutorCore.ioSubmit(task);
+    }
+
+    @Override
+    public ICancelable groupSubmit(String groupName, Runnable task) {
+        return mCategoryExecutorCore.groupSubmit(groupName, task);
     }
 
 }

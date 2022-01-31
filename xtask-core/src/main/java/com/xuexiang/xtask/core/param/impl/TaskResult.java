@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,12 @@
  *
  */
 
-package com.xuexiang.xtask.core.impl;
+package com.xuexiang.xtask.core.param.impl;
 
-import com.xuexiang.xtask.core.ITaskResult;
+import androidx.annotation.NonNull;
+
+import com.xuexiang.xtask.core.param.ITaskParam;
+import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.logger.TaskLogger;
 
 /**
@@ -29,6 +32,45 @@ import com.xuexiang.xtask.logger.TaskLogger;
 public class TaskResult extends TaskParam implements ITaskResult {
 
     private static final String TAG = TaskLogger.getLogTag("TaskResult");
+
+    /**
+     * 获取成功的结果
+     *
+     * @return 任务执行结果
+     */
+    public static TaskResult succeed() {
+        return new TaskResult(ITaskResult.SUCCESS, "");
+    }
+
+    /**
+     * 获取失败的结果
+     *
+     * @return 任务执行结果
+     */
+    public static TaskResult failed() {
+        return new TaskResult(ITaskResult.ERROR, "");
+    }
+
+    /**
+     * 获取失败的结果
+     *
+     * @param code 失败的错误码
+     * @return 任务执行结果
+     */
+    public static TaskResult failed(int code) {
+        return new TaskResult(code, "");
+    }
+
+    /**
+     * 获取失败的结果
+     *
+     * @param code    失败的错误码
+     * @param message 错误信息
+     * @return 任务执行结果
+     */
+    public static TaskResult failed(int code, String message) {
+        return new TaskResult(code, message);
+    }
 
     /**
      * 任务执行结果码
@@ -46,6 +88,25 @@ public class TaskResult extends TaskParam implements ITaskResult {
     public TaskResult() {
 
     }
+
+    /**
+     * 构造方法
+     *
+     * @param taskParam 任务参数
+     */
+    public TaskResult(@NonNull ITaskParam taskParam) {
+        updateParam(taskParam.getPath(), taskParam.getDataStore());
+    }
+
+    /**
+     * 构造方法
+     *
+     * @param taskResult 任务结果
+     */
+    public TaskResult(@NonNull ITaskResult taskResult) {
+        saveResult(taskResult);
+    }
+
 
     /**
      * 构造方法
@@ -95,7 +156,20 @@ public class TaskResult extends TaskParam implements ITaskResult {
             TaskLogger.eTag(TAG, "saveResult error, taskResult is null!");
             return;
         }
-        saveData(taskResult.getDataStore());
+        updateParam(taskResult.getPath(), taskResult.getDataStore());
         setResult(taskResult.getCode(), taskResult.getMessage());
+    }
+
+    @Override
+    public String getDetailMessage() {
+        return "[code]:" + mCode + ", [msg]:" + mMessage;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskResult{" +
+                "mCode=" + mCode +
+                ", mMessage='" + mMessage + '\'' +
+                '}';
     }
 }
