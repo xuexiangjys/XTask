@@ -28,6 +28,13 @@ import com.xuexiang.xtask.core.param.ITaskResult;
 public interface ITaskChainCallback {
 
     /**
+     * 回调是否返回主线程
+     *
+     * @return 是否返回主线程
+     */
+    boolean isCallBackOnMainThread();
+
+    /**
      * 任务步骤开始执行
      *
      * @param engine 任务链

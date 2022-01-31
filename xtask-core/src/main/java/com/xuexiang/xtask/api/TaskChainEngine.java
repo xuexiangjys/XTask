@@ -117,7 +117,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public ITaskChainEngine setTaskChainCallback(ITaskChainCallback iTaskChainCallback) {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain setTaskChainCallback failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " setTaskChainCallback failed, task chain has destroyed!");
             return this;
         }
         mTaskChainCallback = iTaskChainCallback;
@@ -127,7 +127,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public ITaskChainEngine addTask(ITaskStep taskStep) {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain addTask failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " addTask failed, task chain has destroyed!");
             return this;
         }
         if (taskStep != null) {
@@ -140,7 +140,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public ITaskChainEngine addTasks(List<ITaskStep> taskStepList) {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain addTasks failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " addTasks failed, task chain has destroyed!");
             return this;
         }
         if (!CommonUtils.isEmpty(taskStepList)) {
@@ -168,7 +168,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public void start() {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain start failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " start failed, task chain has destroyed!");
             return;
         }
         onTaskChainStart();
@@ -184,7 +184,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public void reset() {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain reset failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " reset failed, task chain has destroyed!");
             return;
         }
         mIsCanceled.set(false);
@@ -215,7 +215,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public void cancel() {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain cancel failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " cancel failed, task chain has destroyed!");
             return;
         }
         if (isCancelled()) {
@@ -236,7 +236,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public void onTaskStepCompleted(@NonNull ITaskStep step, @NonNull ITaskResult result) {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain onTaskStepCompleted failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " onTaskStepCompleted failed, task chain has destroyed!");
             return;
         }
         mResult.saveResult(result);
@@ -254,37 +254,91 @@ public class TaskChainEngine implements ITaskChainEngine {
     @Override
     public void onTaskStepError(@NonNull ITaskStep step, @NonNull ITaskResult result) {
         if (isDestroy()) {
-            TaskLogger.eTag(TAG, "task chain onTaskStepError failed, task chain has destroyed!");
+            TaskLogger.eTag(TAG, getTaskChainName() + " onTaskStepError failed, task chain has destroyed!");
             return;
         }
         onTaskChainError(result);
     }
 
+    private boolean isNeedChangeToMainThread() {
+        return mTaskChainCallback.isCallBackOnMainThread() && !TaskUtils.isMainThread();
+    }
+
     private void onTaskChainStart() {
-        TaskLogger.dTag(TAG, "task chain(size=" + CommonUtils.getSize(mTasks) + ") start...");
-        if (mTaskChainCallback != null) {
+        TaskLogger.dTag(TAG, getTaskChainName() + "(size=" + CommonUtils.getSize(mTasks) + ") start...");
+        if (mTaskChainCallback == null) {
+            return;
+        }
+        if (isNeedChangeToMainThread()) {
+            TaskUtils.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTaskChainCallback.onTaskChainStart(TaskChainEngine.this);
+                }
+            });
+        } else {
             mTaskChainCallback.onTaskChainStart(this);
         }
     }
 
+
     private void onTaskChainCancelled() {
-        TaskLogger.dTag(TAG, "task chain cancelled!");
-        if (mTaskChainCallback != null) {
+        TaskLogger.dTag(TAG, getTaskChainName() + " cancelled!");
+        if (mTaskChainCallback == null) {
+            return;
+        }
+        if (isNeedChangeToMainThread()) {
+            TaskUtils.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTaskChainCallback.onTaskChainCancelled(TaskChainEngine.this);
+                }
+            });
+        } else {
             mTaskChainCallback.onTaskChainCancelled(this);
         }
     }
 
-    private void onTaskChainCompleted(ITaskResult result) {
-        TaskLogger.dTag(TAG, "task chain completed!");
-        if (mTaskChainCallback != null) {
+    private void onTaskChainCompleted(final ITaskResult result) {
+        TaskLogger.dTag(TAG, getTaskChainName() + " completed!");
+        if (mTaskChainCallback == null) {
+            return;
+        }
+        if (isNeedChangeToMainThread()) {
+            TaskUtils.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTaskChainCallback.onTaskChainCompleted(TaskChainEngine.this, result);
+                }
+            });
+        } else {
             mTaskChainCallback.onTaskChainCompleted(this, result);
         }
     }
 
-    private void onTaskChainError(ITaskResult result) {
-        TaskLogger.dTag(TAG, "task chain error!");
-        if (mTaskChainCallback != null) {
+    private void onTaskChainError(final ITaskResult result) {
+        TaskLogger.dTag(TAG, getTaskChainName() + " error!");
+        if (mTaskChainCallback == null) {
+            return;
+        }
+        if (isNeedChangeToMainThread()) {
+            TaskUtils.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTaskChainCallback.onTaskChainError(TaskChainEngine.this, result);
+                }
+            });
+        } else {
             mTaskChainCallback.onTaskChainError(this, result);
         }
+    }
+
+    /**
+     * 获取任务链的名称
+     *
+     * @return 任务链的名称
+     */
+    protected String getTaskChainName() {
+        return "Task chain [" + getName() + "]";
     }
 }

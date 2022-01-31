@@ -73,13 +73,18 @@ public class TaskFragment extends BaseSimpleListFragment {
         engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
 
             @Override
+            public boolean isCallBackOnMainThread() {
+                return false;
+            }
+
+            @Override
             public void onTaskChainStart(ITaskChainEngine engine) {
                 Log.e(TAG, "task chain start");
             }
 
             @Override
             public void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result) {
-                Log.e(TAG, "task chain completed");
+                Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
                 engine.destroy();
             }
 
@@ -118,7 +123,7 @@ public class TaskFragment extends BaseSimpleListFragment {
         engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
             @Override
             public void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result) {
-                Log.e(TAG, "task chain completed");
+                Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
                 Map<String, Object> data = result.getDataStore().getData();
                 for (Map.Entry<String, Object> entry : data.entrySet()) {
                     Log.e(TAG, "key:" + entry.getKey() + ", value:" + entry.getValue());

@@ -17,6 +17,8 @@
 
 package com.xuexiang.xtask.utils;
 
+import android.os.Looper;
+
 import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.logger.TaskLogger;
@@ -37,6 +39,24 @@ public final class TaskUtils {
 
     private TaskUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
+    }
+
+    /**
+     * 是否是主线程
+     *
+     * @return 是否是主线程
+     */
+    public static boolean isMainThread() {
+        return Looper.getMainLooper() == Looper.myLooper();
+    }
+
+    /**
+     * 切到主线程运行
+     *
+     * @param runnable 命令
+     */
+    public static void runOnMainThread(Runnable runnable) {
+        XTaskExecutor.get().postToMain(runnable);
     }
 
     /**
@@ -91,4 +111,5 @@ public final class TaskUtils {
             return null;
         }
     }
+
 }
