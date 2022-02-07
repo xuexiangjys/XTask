@@ -46,18 +46,18 @@ public interface ITaskStepController {
     ITaskParam getTaskParam();
 
     /**
-     * 任务步骤执行完毕
+     * 通知任务链任务步骤执行完毕
      *
      * @param result 任务执行结果
      */
-    void onTaskSucceed(@NonNull ITaskResult result);
+    void notifyTaskSucceed(@NonNull ITaskResult result);
 
     /**
-     * 任务链执行发生异常
+     * 通知任务链执行发生异常
      *
      * @param result 任务执行结果
      */
-    void onTaskFailed(@NonNull ITaskResult result);
+    void notifyTaskFailed(@NonNull ITaskResult result);
 
     /**
      * 资源释放

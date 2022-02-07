@@ -19,11 +19,11 @@ package com.xuexiang.xtask.api.step;
 
 import androidx.annotation.NonNull;
 
-import com.xuexiang.xtask.core.param.ITaskParam;
-import com.xuexiang.xtask.core.step.ITaskStepHandler;
 import com.xuexiang.xtask.core.ThreadType;
-import com.xuexiang.xtask.core.step.impl.AbstractTaskStep;
+import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
+import com.xuexiang.xtask.core.step.ITaskStepHandler;
+import com.xuexiang.xtask.core.step.impl.AbstractTaskStep;
 import com.xuexiang.xtask.core.step.impl.TaskCommand;
 import com.xuexiang.xtask.utils.CommonUtils;
 
@@ -49,6 +49,47 @@ public class XTaskStep extends AbstractTaskStep {
      */
     public static XTaskStep getTask(@NonNull TaskCommand command) {
         return new Builder(command).build();
+    }
+
+    /**
+     * 获取简化任务的构建者
+     *
+     * @param command    任务执行内容
+     * @param threadType 线程类型
+     * @return 简化任务的构建者
+     */
+    public static XTaskStep getTask(@NonNull TaskCommand command, ThreadType threadType) {
+        return new Builder(command)
+                .setThreadType(threadType)
+                .build();
+    }
+
+    /**
+     * 获取简化任务的构建者
+     *
+     * @param command   任务执行内容
+     * @param taskParam 任务参数
+     * @return 简化任务的构建者
+     */
+    public static XTaskStep getTask(@NonNull TaskCommand command, @NonNull ITaskParam taskParam) {
+        return new Builder(command)
+                .setTaskParam(taskParam)
+                .build();
+    }
+
+    /**
+     * 获取简化任务的构建者
+     *
+     * @param command    任务执行内容
+     * @param threadType 线程类型
+     * @param taskParam  任务参数
+     * @return 简化任务的构建者
+     */
+    public static XTaskStep getTask(@NonNull TaskCommand command, ThreadType threadType, @NonNull ITaskParam taskParam) {
+        return new Builder(command)
+                .setThreadType(threadType)
+                .setTaskParam(taskParam)
+                .build();
     }
 
     /**

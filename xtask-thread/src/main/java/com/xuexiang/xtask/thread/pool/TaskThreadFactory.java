@@ -22,6 +22,8 @@ import androidx.annotation.NonNull;
 
 import com.xuexiang.xtask.logger.TaskLogger;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,9 +38,9 @@ public class TaskThreadFactory implements ThreadFactory {
     private static final String TAG = TaskLogger.getLogTag("TaskThreadFactory");
 
     /**
-     * 线程池的编号【静态全局】
+     * 线程池的编号池【静态全局】<优先级，线程池的编号>
      */
-    private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
+    private static final Map<Integer, AtomicInteger> POOL_NUMBER_MAP = new ConcurrentHashMap<>();
     /**
      * 线程组
      */
@@ -86,7 +88,7 @@ public class TaskThreadFactory implements ThreadFactory {
     private TaskThreadFactory(@NonNull String factoryName, @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int priority) {
         SecurityManager securityManager = System.getSecurityManager();
         mThreadGroup = (securityManager != null) ? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        mNamePrefix = factoryName + "-task-pool No." + POOL_NUMBER.getAndIncrement() + ", thread No.";
+        mNamePrefix = factoryName + "-task-pool(" + priority + ") No." + getTaskPoolNumber(priority) + ", thread No.";
         mPriority = priority;
     }
 
@@ -110,5 +112,14 @@ public class TaskThreadFactory implements ThreadFactory {
             }
         });
         return thread;
+    }
+
+    private int getTaskPoolNumber(int priority) {
+        AtomicInteger poolNumber = POOL_NUMBER_MAP.get(priority);
+        if (poolNumber == null) {
+            poolNumber = new AtomicInteger(1);
+            POOL_NUMBER_MAP.put(priority, poolNumber);
+        }
+        return poolNumber.getAndIncrement();
     }
 }

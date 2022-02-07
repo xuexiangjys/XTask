@@ -17,48 +17,83 @@
 
 package com.xuexiang.xtask.api.step;
 
-import com.xuexiang.xtask.core.ITaskChainEngine;
-import com.xuexiang.xtask.core.step.IGroupTaskStep;
-import com.xuexiang.xtask.core.step.ITaskStep;
-import com.xuexiang.xtask.core.step.impl.AbstractTaskStep;
+import androidx.annotation.NonNull;
 
-import java.util.List;
+import com.xuexiang.xtask.core.param.ITaskParam;
+import com.xuexiang.xtask.core.param.ITaskResult;
+import com.xuexiang.xtask.core.step.ITaskStep;
+import com.xuexiang.xtask.core.step.impl.AbstractGroupTaskStep;
+import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.utils.TaskUtils;
 
 /**
- * 串行任务组
+ * 串行任务组(不进行具体的任务）
  *
  * @author xuexiang
  * @since 2021/11/8 2:02 AM
  */
-public class SerialGroupTaskStep extends AbstractTaskStep implements IGroupTaskStep {
+public class SerialGroupTaskStep extends AbstractGroupTaskStep {
 
     /**
-     * 串行任务组名称
+     * 获取串行任务组
+     *
+     * @return 串行任务组
      */
-    private String mName;
+    public static SerialGroupTaskStep get() {
+        return new SerialGroupTaskStep();
+    }
 
-    @Override
-    public String getName() {
-        return null;
+    /**
+     * 获取串行任务组
+     *
+     * @param name 任务组名称
+     * @return 串行任务组
+     */
+    public static SerialGroupTaskStep get(String name) {
+        return new SerialGroupTaskStep(name);
+    }
+
+    public SerialGroupTaskStep() {
+        super();
+    }
+
+    public SerialGroupTaskStep(String name) {
+        super(name);
+    }
+
+    public SerialGroupTaskStep(String name, @NonNull ITaskParam taskParam) {
+        super(name, taskParam);
     }
 
     @Override
     public void doTask() throws Exception {
-
+        ITaskStep firstTaskStep = TaskUtils.findNextTaskStep(getTasks(), null);
+        if (firstTaskStep != null) {
+            firstTaskStep.prepareTask(getResult());
+            ICancelable cancelable = TaskUtils.executeTask(firstTaskStep);
+            firstTaskStep.setCancelable(cancelable);
+        } else {
+            notifyTaskSucceed(getResult());
+        }
     }
 
     @Override
-    public ITaskChainEngine addTask(ITaskStep taskStep) {
-        return null;
+    public void onTaskStepCompleted(@NonNull ITaskStep step, @NonNull ITaskResult result) {
+        getResult().saveResult(result);
+        ITaskStep nextTaskStep = TaskUtils.findNextTaskStep(getTasks(), step);
+        if (nextTaskStep != null) {
+            // 更新数据，将上一个task的结果更新到下一个task
+            nextTaskStep.prepareTask(getResult());
+            ICancelable cancelable = TaskUtils.executeTask(nextTaskStep);
+            nextTaskStep.setCancelable(cancelable);
+        } else {
+            notifyTaskSucceed(result);
+        }
     }
 
     @Override
-    public ITaskChainEngine addTasks(List<ITaskStep> taskStepList) {
-        return null;
+    public void onTaskStepError(@NonNull ITaskStep step, @NonNull ITaskResult result) {
+        notifyTaskFailed(result);
     }
 
-    @Override
-    public void clearTask() {
-
-    }
 }

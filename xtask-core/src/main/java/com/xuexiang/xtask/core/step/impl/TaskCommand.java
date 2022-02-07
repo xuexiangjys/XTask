@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
+import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.ITaskStepController;
 
 /**
@@ -32,6 +33,9 @@ import com.xuexiang.xtask.core.step.ITaskStepController;
  */
 public abstract class TaskCommand implements Runnable, ITaskStepController {
 
+    /**
+     * 任务步骤执行控制器
+     */
     private ITaskStepController mController;
 
     /**
@@ -45,17 +49,24 @@ public abstract class TaskCommand implements Runnable, ITaskStepController {
         return this;
     }
 
+    /**
+     * 通知任务链任务步骤执行完毕
+     */
+    public void notifyTaskSucceed() {
+        notifyTaskSucceed(TaskResult.succeed());
+    }
+
     @Override
-    public void onTaskSucceed(@NonNull ITaskResult result) {
+    public void notifyTaskSucceed(@NonNull ITaskResult result) {
         if (mController != null) {
-            mController.onTaskSucceed(result);
+            mController.notifyTaskSucceed(result);
         }
     }
 
     @Override
-    public void onTaskFailed(@NonNull ITaskResult result) {
+    public void notifyTaskFailed(@NonNull ITaskResult result) {
         if (mController != null) {
-            mController.onTaskFailed(result);
+            mController.notifyTaskFailed(result);
         }
     }
 

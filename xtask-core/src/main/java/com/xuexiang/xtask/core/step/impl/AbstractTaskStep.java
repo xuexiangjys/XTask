@@ -42,15 +42,17 @@ public abstract class AbstractTaskStep implements ITaskStep {
     private static final String TAG = TaskLogger.getLogTag("AbstractTaskStep");
 
     /**
+     * 是否正在等待
+     */
+    private AtomicBoolean mIsPending = new AtomicBoolean(true);
+    /**
      * 是否正在运行
      */
     private AtomicBoolean mIsRunning = new AtomicBoolean(false);
-
     /**
      * 是否取消
      */
     private AtomicBoolean mIsCancelled = new AtomicBoolean(false);
-
     /**
      * 任务步骤的生命周期管理
      */
@@ -122,8 +124,21 @@ public abstract class AbstractTaskStep implements ITaskStep {
     }
 
     @Override
-    public void setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle) {
+    public AbstractTaskStep setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle) {
         mTaskStepLifecycle = taskStepLifecycle;
+        return this;
+    }
+
+    @Override
+    public AbstractTaskStep setThreadType(ThreadType threadType) {
+        mThreadType = threadType;
+        return this;
+    }
+
+    @Override
+    public AbstractTaskStep setTaskParam(@NonNull ITaskParam taskParam) {
+        mTaskParam = taskParam;
+        return this;
     }
 
     @Override
@@ -153,6 +168,11 @@ public abstract class AbstractTaskStep implements ITaskStep {
     }
 
     @Override
+    public boolean isPending() {
+        return mIsPending.get();
+    }
+
+    @Override
     public boolean accept() {
         if (mTaskHandler != null) {
             return mTaskHandler.accept(this);
@@ -162,31 +182,35 @@ public abstract class AbstractTaskStep implements ITaskStep {
 
     @Override
     public void prepareTask(TaskParam taskParam) {
-        mTaskParam.updateParam(taskParam);
+        getTaskParam().updateParam(taskParam);
     }
 
     @Override
-    public void onTaskSucceed(@NonNull ITaskResult result) {
-        TaskLogger.dTag(TAG, getTaskLogName() + " succeed!");
+    public void notifyTaskSucceed(@NonNull ITaskResult result) {
         mIsRunning.set(false);
+        if (isCancelled()) {
+            TaskLogger.wTag(TAG, getTaskLogName() + " has cancelled！");
+            return;
+        }
+        TaskLogger.dTag(TAG, getTaskLogName() + " succeed!");
         if (mTaskHandler != null) {
             mTaskHandler.handleTaskSucceed(this);
         }
         if (mTaskStepLifecycle != null) {
-            result.updateParam(mTaskParam);
+            result.updateParam(getTaskParam());
             mTaskStepLifecycle.onTaskStepCompleted(this, result);
         }
     }
 
     @Override
-    public void onTaskFailed(@NonNull ITaskResult result) {
-        TaskLogger.eTag(TAG, getTaskLogName() + " failed, " + result.getDetailMessage());
+    public void notifyTaskFailed(@NonNull ITaskResult result) {
         mIsRunning.set(false);
+        TaskLogger.eTag(TAG, getTaskLogName() + " failed, " + result.getDetailMessage());
         if (mTaskHandler != null) {
             mTaskHandler.handleTaskFailed(this);
         }
         if (mTaskStepLifecycle != null) {
-            result.updateParam(mTaskParam);
+            result.updateParam(getTaskParam());
             mTaskStepLifecycle.onTaskStepError(this, result);
         }
     }
@@ -194,7 +218,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
     @Override
     public void recycle() {
         TaskLogger.dTag(TAG, getTaskLogName() + " recycle...");
-        if (canCancel()) {
+        if (isRunning() && !isCancelled()) {
             cancel();
         }
         mTaskParam.clear();
@@ -205,10 +229,12 @@ public abstract class AbstractTaskStep implements ITaskStep {
 
     @Override
     public void cancel() {
-        if (!canCancel()) {
+        if (isCancelled()) {
             return;
         }
-        TaskLogger.dTag(TAG, getTaskLogName() + " cancel...");
+        if (isPending() || isRunning()) {
+            TaskLogger.dTag(TAG, getTaskLogName() + " cancel...");
+        }
         if (mCancelable != null) {
             mCancelable.cancel();
         }
@@ -216,15 +242,6 @@ public abstract class AbstractTaskStep implements ITaskStep {
         if (mTaskHandler != null) {
             mTaskHandler.handleTaskCancelled(this);
         }
-    }
-
-    /**
-     * 是否可以取消
-     *
-     * @return 是否可以取消
-     */
-    private boolean canCancel() {
-        return isRunning() && !isCancelled();
     }
 
     @Override
@@ -235,7 +252,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
     @Override
     public void run() {
         if (isCancelled()) {
-            TaskLogger.wTag(TAG, getTaskLogName() + " has canceled！");
+            TaskLogger.wTag(TAG, getTaskLogName() + " has cancelled, do not need to run！");
             return;
         }
         setIsRunning(true);
@@ -268,8 +285,9 @@ public abstract class AbstractTaskStep implements ITaskStep {
      * 更新任务处理的路径
      */
     private void updateProcessTaskPath() {
-        mTaskParam.addPath(getName());
-        TaskLogger.dTag(TAG, getTaskLogName() + " has run, path: " + mTaskParam.getPath());
+        getTaskParam().addPath(getName());
+        TaskLogger.dTag(TAG, getTaskLogName() + " has run, path: " + getTaskParam().getPath());
+        mIsPending.set(false);
     }
 
     /**

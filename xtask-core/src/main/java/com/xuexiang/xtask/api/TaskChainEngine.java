@@ -21,11 +21,14 @@ import androidx.annotation.NonNull;
 
 import com.xuexiang.xtask.core.ITaskChainCallback;
 import com.xuexiang.xtask.core.ITaskChainEngine;
+import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.ICanceller;
+import com.xuexiang.xtask.utils.CancellerPoolUtils;
 import com.xuexiang.xtask.utils.CommonUtils;
 import com.xuexiang.xtask.utils.TaskUtils;
 
@@ -52,7 +55,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     /**
      * 是否取消
      */
-    private AtomicBoolean mIsCanceled = new AtomicBoolean(false);
+    private AtomicBoolean mIsCancelled = new AtomicBoolean(false);
 
     /**
      * 任务链名称
@@ -73,6 +76,11 @@ public class TaskChainEngine implements ITaskChainEngine {
      * 任务链执行回调
      */
     private ITaskChainCallback mTaskChainCallback;
+
+    /**
+     * 执行的时候，是否把取消者加入到缓存池中去
+     */
+    private boolean mIsAddCancellerPool;
 
     /**
      * 获取任务链执行引擎
@@ -115,7 +123,13 @@ public class TaskChainEngine implements ITaskChainEngine {
     }
 
     @Override
-    public ITaskChainEngine setTaskChainCallback(ITaskChainCallback iTaskChainCallback) {
+    public TaskChainEngine setTaskParam(@NonNull ITaskParam taskParam) {
+        mResult.updateParam(taskParam);
+        return this;
+    }
+
+    @Override
+    public TaskChainEngine setTaskChainCallback(ITaskChainCallback iTaskChainCallback) {
         if (isDestroy()) {
             TaskLogger.eTag(TAG, getTaskChainName() + " setTaskChainCallback failed, task chain has destroyed!");
             return this;
@@ -125,7 +139,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     }
 
     @Override
-    public ITaskChainEngine addTask(ITaskStep taskStep) {
+    public TaskChainEngine addTask(ITaskStep taskStep) {
         if (isDestroy()) {
             TaskLogger.eTag(TAG, getTaskChainName() + " addTask failed, task chain has destroyed!");
             return this;
@@ -138,7 +152,7 @@ public class TaskChainEngine implements ITaskChainEngine {
     }
 
     @Override
-    public ITaskChainEngine addTasks(List<ITaskStep> taskStepList) {
+    public TaskChainEngine addTasks(List<ITaskStep> taskStepList) {
         if (isDestroy()) {
             TaskLogger.eTag(TAG, getTaskChainName() + " addTasks failed, task chain has destroyed!");
             return this;
@@ -166,19 +180,29 @@ public class TaskChainEngine implements ITaskChainEngine {
     }
 
     @Override
-    public void start() {
+    public ICanceller start() {
+        return start(true);
+    }
+
+    @Override
+    public ICanceller start(boolean isAddPool) {
         if (isDestroy()) {
             TaskLogger.eTag(TAG, getTaskChainName() + " start failed, task chain has destroyed!");
-            return;
+            return null;
         }
+        mIsAddCancellerPool = isAddPool;
         onTaskChainStart();
-        ITaskStep taskStep = TaskUtils.findNextTaskStep(mTasks, null);
-        if (taskStep != null) {
-            ICancelable cancelable = TaskUtils.executeTask(taskStep);
-            taskStep.setCancelable(cancelable);
+        ITaskStep firstTaskStep = TaskUtils.findNextTaskStep(mTasks, null);
+        if (firstTaskStep != null) {
+            ICancelable cancelable = TaskUtils.executeTask(firstTaskStep);
+            firstTaskStep.setCancelable(cancelable);
         } else {
             onTaskChainCompleted(mResult);
         }
+        if (isAddPool) {
+            CancellerPoolUtils.add(getName(), this);
+        }
+        return this;
     }
 
     @Override
@@ -187,9 +211,10 @@ public class TaskChainEngine implements ITaskChainEngine {
             TaskLogger.eTag(TAG, getTaskChainName() + " reset failed, task chain has destroyed!");
             return;
         }
-        mIsCanceled.set(false);
+        mIsCancelled.set(false);
         mResult.clear();
         clearTask();
+        CancellerPoolUtils.remove(getName());
     }
 
     @Override
@@ -224,13 +249,13 @@ public class TaskChainEngine implements ITaskChainEngine {
         for (ITaskStep taskStep : mTasks) {
             taskStep.cancel();
         }
-        mIsCanceled.set(true);
+        mIsCancelled.set(true);
         onTaskChainCancelled();
     }
 
     @Override
     public boolean isCancelled() {
-        return mIsCanceled.get();
+        return mIsCancelled.get();
     }
 
     @Override
@@ -284,6 +309,9 @@ public class TaskChainEngine implements ITaskChainEngine {
 
     private void onTaskChainCancelled() {
         TaskLogger.dTag(TAG, getTaskChainName() + " cancelled!");
+        if (mIsAddCancellerPool) {
+            CancellerPoolUtils.remove(getName());
+        }
         if (mTaskChainCallback == null) {
             return;
         }
@@ -301,6 +329,9 @@ public class TaskChainEngine implements ITaskChainEngine {
 
     private void onTaskChainCompleted(final ITaskResult result) {
         TaskLogger.dTag(TAG, getTaskChainName() + " completed!");
+        if (mIsAddCancellerPool) {
+            CancellerPoolUtils.remove(getName());
+        }
         if (mTaskChainCallback == null) {
             return;
         }
@@ -318,6 +349,9 @@ public class TaskChainEngine implements ITaskChainEngine {
 
     private void onTaskChainError(final ITaskResult result) {
         TaskLogger.dTag(TAG, getTaskChainName() + " error!");
+        if (mIsAddCancellerPool) {
+            CancellerPoolUtils.remove(getName());
+        }
         if (mTaskChainCallback == null) {
             return;
         }

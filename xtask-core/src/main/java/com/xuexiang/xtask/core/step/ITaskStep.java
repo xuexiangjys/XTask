@@ -17,7 +17,10 @@
 
 package com.xuexiang.xtask.core.step;
 
+import androidx.annotation.NonNull;
+
 import com.xuexiang.xtask.core.ThreadType;
+import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
 import com.xuexiang.xtask.thread.pool.ICancelable;
 
@@ -33,8 +36,25 @@ public interface ITaskStep extends Runnable, ICancelable, ITaskStepController {
      * 设置任务步骤的生命周期
      *
      * @param taskStepLifecycle 任务步骤的生命周期
+     * @return 任务步骤
      */
-    void setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle);
+    ITaskStep setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle);
+
+    /**
+     * 设置执行的线程类型
+     *
+     * @param threadType 线程类型
+     * @return 任务步骤
+     */
+    ITaskStep setThreadType(ThreadType threadType);
+
+    /**
+     * 设置执行的任务参数
+     *
+     * @param taskParam 任务参数
+     * @return 任务步骤
+     */
+    ITaskStep setTaskParam(@NonNull ITaskParam taskParam);
 
     /**
      * 获取执行的线程类型
@@ -84,5 +104,12 @@ public interface ITaskStep extends Runnable, ICancelable, ITaskStepController {
      * @return 是否正在运行
      */
     boolean isRunning();
+
+    /**
+     * 是否正在等待
+     *
+     * @return 是否正在等待
+     */
+    boolean isPending();
 
 }

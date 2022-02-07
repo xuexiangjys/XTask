@@ -17,24 +17,27 @@
 
 package com.xuexiang.xtask.api.step;
 
-import com.xuexiang.xtask.core.ITaskChainEngine;
-import com.xuexiang.xtask.core.step.IGroupTaskStep;
-import com.xuexiang.xtask.core.step.ITaskStep;
-import com.xuexiang.xtask.core.step.impl.AbstractTaskStep;
+import androidx.annotation.NonNull;
 
-import java.util.List;
+import com.xuexiang.xtask.core.param.ITaskParam;
+import com.xuexiang.xtask.core.param.ITaskResult;
+import com.xuexiang.xtask.core.step.ITaskStep;
+import com.xuexiang.xtask.core.step.impl.AbstractGroupTaskStep;
 
 /**
- * 并行任务组
+ * 并行任务组(不进行具体的任务）
  *
  * @author xuexiang
  * @since 2021/11/8 2:04 AM
  */
-public class ConcurrentGroupTaskStep extends AbstractTaskStep implements IGroupTaskStep {
+public class ConcurrentGroupTaskStep extends AbstractGroupTaskStep {
 
-    @Override
-    public String getName() {
-        return null;
+    public ConcurrentGroupTaskStep(String name) {
+        super(name);
+    }
+
+    public ConcurrentGroupTaskStep(String name, @NonNull ITaskParam taskParam) {
+        super(name, taskParam);
     }
 
     @Override
@@ -42,18 +45,14 @@ public class ConcurrentGroupTaskStep extends AbstractTaskStep implements IGroupT
 
     }
 
+
     @Override
-    public ITaskChainEngine addTask(ITaskStep taskStep) {
-        return null;
+    public void onTaskStepCompleted(@NonNull ITaskStep step, @NonNull ITaskResult result) {
+
     }
 
     @Override
-    public ITaskChainEngine addTasks(List<ITaskStep> taskStepList) {
-        return null;
-    }
-
-    @Override
-    public void clearTask() {
+    public void onTaskStepError(@NonNull ITaskStep step, @NonNull ITaskResult result) {
 
     }
 }

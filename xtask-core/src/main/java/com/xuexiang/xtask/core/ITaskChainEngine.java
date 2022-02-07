@@ -17,9 +17,13 @@
 
 package com.xuexiang.xtask.core;
 
+import androidx.annotation.NonNull;
+
+import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.step.IGroupTaskStep;
 import com.xuexiang.xtask.core.step.ITaskStepLifecycle;
 import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.ICanceller;
 
 /**
  * 任务链执行引擎实现接口
@@ -27,14 +31,23 @@ import com.xuexiang.xtask.thread.pool.ICancelable;
  * @author xuexiang
  * @since 2021/10/19 1:43 AM
  */
-public interface ITaskChainEngine extends ITaskStepLifecycle, IGroupTaskStep, ICancelable {
+public interface ITaskChainEngine extends ITaskStepLifecycle, IGroupTaskStep, ICanceller {
 
     /**
      * 获取任务链的名称
      *
      * @return 任务链的名称
      */
+    @Override
     String getName();
+
+    /**
+     * 初始化任务参数
+     *
+     * @param taskParam 任务参数
+     * @return 任务链执行引擎
+     */
+    ITaskChainEngine setTaskParam(@NonNull ITaskParam taskParam);
 
     /**
      * 设置任务链执行回调
@@ -46,8 +59,18 @@ public interface ITaskChainEngine extends ITaskStepLifecycle, IGroupTaskStep, IC
 
     /**
      * 开始任务
+     *
+     * @return 取消的接口
      */
-    void start();
+    ICancelable start();
+
+    /**
+     * 开始任务
+     *
+     * @param isAddPool 是否增加到取消者订阅池里
+     * @return 取消的接口
+     */
+    ICancelable start(boolean isAddPool);
 
     /**
      * 重置任务链（可继续使用)
