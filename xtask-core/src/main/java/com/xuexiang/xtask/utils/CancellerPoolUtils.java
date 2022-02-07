@@ -104,7 +104,7 @@ public final class CancellerPoolUtils {
     }
 
     /**
-     * 清楚所有
+     * 清除所有
      *
      * @param ifNeedCancel 是否在清除前取消
      */

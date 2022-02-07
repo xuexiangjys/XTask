@@ -22,6 +22,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.xuexiang.xpage.annotation.Page;
+import com.xuexiang.xtask.XTask;
 import com.xuexiang.xtask.api.TaskChainEngine;
 import com.xuexiang.xtask.api.step.ConcurrentGroupTaskStep;
 import com.xuexiang.xtask.api.step.SerialGroupTaskStep;
@@ -35,7 +36,6 @@ import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.impl.TaskChainCallbackAdapter;
 import com.xuexiang.xtask.core.step.impl.TaskCommand;
 import com.xuexiang.xtask.thread.pool.ICanceller;
-import com.xuexiang.xtask.utils.CancellerPoolUtils;
 import com.xuexiang.xtaskdemo.core.BaseSimpleListFragment;
 import com.xuexiang.xutil.common.ObjectUtils;
 
@@ -97,9 +97,9 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
      * 简单任务链的使用
      */
     private void doSimpleTaskChain() {
-        final TaskChainEngine engine = TaskChainEngine.get();
+        final TaskChainEngine engine = XTask.getTaskChain();
         for (int i = 0; i < 5; i++) {
-            engine.addTask(XTaskStep.getTask(new SimpleTaskCommand(1000 * i)));
+            engine.addTask(XTask.getTask(new SimpleTaskCommand(1000 * i)));
         }
         ICanceller canceller = engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
 
@@ -133,10 +133,10 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
      * 任务链参数传递，上一个任务的参数可传递至下一个任务
      */
     private void doParamTaskChain() {
-        final TaskChainEngine engine = TaskChainEngine.get();
+        final TaskChainEngine engine = XTask.getTaskChain();
         TaskParam taskParam = TaskParam.get("param1", 100)
                 .put("param2", true);
-        XTaskStep taskStep = XTaskStep.getTask(new TaskCommand() {
+        XTaskStep taskStep = XTask.getTask(new TaskCommand() {
             @Override
             public void run() {
                 ITaskParam param = getTaskParam();
@@ -147,7 +147,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
             }
         }, taskParam);
         engine.addTask(taskStep)
-                .addTask(XTaskStep.getTask(new TaskCommand() {
+                .addTask(XTask.getTask(new TaskCommand() {
                     @Override
                     public void run() {
                         ITaskParam param = getTaskParam();
@@ -175,13 +175,13 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
      * 任务线程控制
      */
     private void doThreadTypeTaskChain() {
-        final TaskChainEngine engine = TaskChainEngine.get();
-        ICanceller canceller = engine.addTask(XTaskStep.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC))
-                .addTask(XTaskStep.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_EMERGENT))
-                .addTask(XTaskStep.getTask(new SimpleTaskCommand(200), ThreadType.MAIN))
-                .addTask(XTaskStep.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_IO))
-                .addTask(XTaskStep.getTask(new SimpleTaskCommand(1000), ThreadType.SYNC))
-                .addTask(XTaskStep.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_BACKGROUND))
+        final TaskChainEngine engine = XTask.getTaskChain();
+        ICanceller canceller = engine.addTask(XTask.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC))
+                .addTask(XTask.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_EMERGENT))
+                .addTask(XTask.getTask(new SimpleTaskCommand(200), ThreadType.MAIN))
+                .addTask(XTask.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_IO))
+                .addTask(XTask.getTask(new SimpleTaskCommand(1000), ThreadType.SYNC))
+                .addTask(XTask.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_BACKGROUND))
                 .setTaskChainCallback(new TaskChainCallbackAdapter() {
                     @Override
                     public void onTaskChainStart(@NonNull ITaskChainEngine engine) {
@@ -202,14 +202,14 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
      * 简单的串行任务组使用
      */
     private void doSerialGroupTaskChain() {
-        final TaskChainEngine engine = TaskChainEngine.get();
-        SerialGroupTaskStep group1 = SerialGroupTaskStep.get("group1");
+        final TaskChainEngine engine = XTask.getTaskChain();
+        SerialGroupTaskStep group1 = XTask.getSerialGroupTask("group1");
         for (int i = 0; i < 5; i++) {
-            group1.addTask(XTaskStep.getTask(new SimpleTaskCommand(500)));
+            group1.addTask(XTask.getTask(new SimpleTaskCommand(500)));
         }
-        SerialGroupTaskStep group2 = SerialGroupTaskStep.get("group2");
+        SerialGroupTaskStep group2 = XTask.getSerialGroupTask("group2");
         for (int i = 0; i < 5; i++) {
-            group2.addTask(XTaskStep.getTask(new SimpleTaskCommand(1000)));
+            group2.addTask(XTask.getTask(new SimpleTaskCommand(1000)));
         }
         ICanceller canceller = engine.addTask(group1)
                 .addTask(group2)
@@ -229,14 +229,14 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
      * 简单的并行任务组使用
      */
     private void doConcurrentGroupTaskChain() {
-        final TaskChainEngine engine = TaskChainEngine.get();
-        ConcurrentGroupTaskStep group1 = ConcurrentGroupTaskStep.get("group1");
+        final TaskChainEngine engine = XTask.getTaskChain();
+        ConcurrentGroupTaskStep group1 = XTask.getConcurrentGroupTask("group1");
         for (int i = 0; i < 5; i++) {
-            group1.addTask(XTaskStep.getTask(new SimpleTaskCommand(100 * (i + 1))));
+            group1.addTask(XTask.getTask(new SimpleTaskCommand(100 * (i + 1))));
         }
-        ConcurrentGroupTaskStep group2 = ConcurrentGroupTaskStep.get("group2");
+        ConcurrentGroupTaskStep group2 = XTask.getConcurrentGroupTask("group2");
         for (int i = 0; i < 5; i++) {
-            group2.addTask(XTaskStep.getTask(new SimpleTaskCommand(200 * (i + 1))));
+            group2.addTask(XTask.getTask(new SimpleTaskCommand(200 * (i + 1))));
         }
         ICanceller canceller = engine.addTask(group1)
                 .addTask(group2)
@@ -257,10 +257,10 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
      * 任务执行失败，整个链路都停止工作
      */
     private void doTaskError() {
-        final TaskChainEngine engine = TaskChainEngine.get();
+        final TaskChainEngine engine = XTask.getTaskChain();
         for (int i = 0; i < 5; i++) {
             int finalI = i;
-            engine.addTask(XTaskStep.getTask(new TaskCommand() {
+            engine.addTask(XTask.getTask(new TaskCommand() {
                 @Override
                 public void run() {
                     try {
@@ -317,7 +317,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
     @Override
     public void onDestroyView() {
         if (!ObjectUtils.isEmpty(mPool)) {
-            CancellerPoolUtils.cancel(mPool);
+            XTask.cancelTaskChain(mPool);
         }
         super.onDestroyView();
     }
