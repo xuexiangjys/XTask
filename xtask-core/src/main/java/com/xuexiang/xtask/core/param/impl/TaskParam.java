@@ -38,7 +38,6 @@ public class TaskParam implements ITaskParam {
      * 路径箭头
      */
     private static final String PATH_ARROW = "->";
-
     /**
      * 数据存储仓库
      */
@@ -74,6 +73,21 @@ public class TaskParam implements ITaskParam {
     @Override
     public void addPath(String path) {
         mPath.append(PATH_ARROW).append(path);
+    }
+
+    @Override
+    public void addGroupPath(String path, int index, int total) {
+        if (index < 0 || index >= total) {
+            return;
+        }
+        mPath.append(PATH_ARROW);
+        if (index == 0) {
+            mPath.append("[");
+        }
+        mPath.append(path);
+        if (index == total - 1) {
+            mPath.append("]");
+        }
     }
 
     @Override

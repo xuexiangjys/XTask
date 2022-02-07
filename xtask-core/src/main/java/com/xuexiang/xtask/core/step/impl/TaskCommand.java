@@ -56,6 +56,32 @@ public abstract class TaskCommand implements Runnable, ITaskStepController {
         notifyTaskSucceed(TaskResult.succeed());
     }
 
+    /**
+     * 通知任务链任务步骤执行失败
+     */
+    public void notifyTaskFailed() {
+        notifyTaskFailed(TaskResult.failed());
+    }
+
+    /**
+     * 通知任务链任务步骤执行失败
+     *
+     * @param code 失败的错误码
+     */
+    public void notifyTaskFailed(int code) {
+        notifyTaskFailed(TaskResult.failed(code));
+    }
+
+    /**
+     * 通知任务链任务步骤执行失败
+     *
+     * @param code    失败的错误码
+     * @param message 错误信息
+     */
+    public void notifyTaskFailed(int code, String message) {
+        notifyTaskFailed(TaskResult.failed(code, message));
+    }
+
     @Override
     public void notifyTaskSucceed(@NonNull ITaskResult result) {
         if (mController != null) {

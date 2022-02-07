@@ -17,6 +17,8 @@
 
 package com.xuexiang.xtask.core;
 
+import androidx.annotation.NonNull;
+
 import com.xuexiang.xtask.core.param.ITaskResult;
 
 /**
@@ -39,7 +41,7 @@ public interface ITaskChainCallback {
      *
      * @param engine 任务链
      */
-    void onTaskChainStart(ITaskChainEngine engine);
+    void onTaskChainStart(@NonNull ITaskChainEngine engine);
 
     /**
      * 任务步骤执行完毕
@@ -47,7 +49,7 @@ public interface ITaskChainCallback {
      * @param engine 任务链
      * @param result 任务执行结果
      */
-    void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result);
+    void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result);
 
     /**
      * 任务步骤执行发生异常
@@ -55,13 +57,13 @@ public interface ITaskChainCallback {
      * @param engine 任务链
      * @param result 任务执行结果
      */
-    void onTaskChainError(ITaskChainEngine engine, ITaskResult result);
+    void onTaskChainError(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result);
 
     /**
      * 任务步骤执行被取消
      *
      * @param engine 任务链
      */
-    void onTaskChainCancelled(ITaskChainEngine engine);
+    void onTaskChainCancelled(@NonNull ITaskChainEngine engine);
 
 }

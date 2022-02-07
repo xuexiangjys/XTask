@@ -19,8 +19,11 @@ package com.xuexiang.xtaskdemo.fragment;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.xuexiang.xpage.annotation.Page;
 import com.xuexiang.xtask.api.TaskChainEngine;
+import com.xuexiang.xtask.api.step.ConcurrentGroupTaskStep;
 import com.xuexiang.xtask.api.step.SerialGroupTaskStep;
 import com.xuexiang.xtask.api.step.XTaskStep;
 import com.xuexiang.xtask.core.ITaskChainEngine;
@@ -31,7 +34,6 @@ import com.xuexiang.xtask.core.param.impl.TaskParam;
 import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.impl.TaskChainCallbackAdapter;
 import com.xuexiang.xtask.core.step.impl.TaskCommand;
-import com.xuexiang.xtask.thread.pool.ICancelable;
 import com.xuexiang.xtask.thread.pool.ICanceller;
 import com.xuexiang.xtask.utils.CancellerPoolUtils;
 import com.xuexiang.xtaskdemo.core.BaseSimpleListFragment;
@@ -59,6 +61,8 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
         lists.add("任务链参数传递");
         lists.add("任务线程控制");
         lists.add("简单的串行任务组使用");
+        lists.add("简单的并行任务组使用");
+        lists.add("任务执行失败");
         return lists;
     }
 
@@ -75,14 +79,19 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 doThreadTypeTaskChain();
                 break;
             case 3:
-                doGroupTaskChain();
+                doSerialGroupTaskChain();
+                break;
+            case 4:
+                doConcurrentGroupTaskChain();
+                break;
+            case 5:
+                doTaskError();
                 break;
             default:
                 break;
         }
 
     }
-
 
     /**
      * 简单任务链的使用
@@ -100,18 +109,18 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
             }
 
             @Override
-            public void onTaskChainStart(ITaskChainEngine engine) {
+            public void onTaskChainStart(@NonNull ITaskChainEngine engine) {
                 Log.e(TAG, "task chain start");
             }
 
             @Override
-            public void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result) {
+            public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
                 Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
                 engine.destroy();
             }
 
             @Override
-            public void onTaskChainError(ITaskChainEngine engine, ITaskResult result) {
+            public void onTaskChainError(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
                 Log.e(TAG, "task chain error");
             }
         }).start();
@@ -149,7 +158,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 }));
         ICanceller canceller = engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
             @Override
-            public void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result) {
+            public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
                 Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
                 Map<String, Object> data = result.getDataStore().getData();
                 for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -175,12 +184,12 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 .addTask(XTaskStep.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_BACKGROUND))
                 .setTaskChainCallback(new TaskChainCallbackAdapter() {
                     @Override
-                    public void onTaskChainStart(ITaskChainEngine engine) {
+                    public void onTaskChainStart(@NonNull ITaskChainEngine engine) {
                         Log.e(TAG, "task chain start, thread:" + Thread.currentThread().getName());
                     }
 
                     @Override
-                    public void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result) {
+                    public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
                         Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
                     }
                 }).start();
@@ -192,7 +201,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
     /**
      * 简单的串行任务组使用
      */
-    private void doGroupTaskChain() {
+    private void doSerialGroupTaskChain() {
         final TaskChainEngine engine = TaskChainEngine.get();
         SerialGroupTaskStep group1 = SerialGroupTaskStep.get("group1");
         for (int i = 0; i < 5; i++) {
@@ -204,7 +213,80 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
         }
         ICanceller canceller = engine.addTask(group1)
                 .addTask(group2)
+                .setTaskChainCallback(new TaskChainCallbackAdapter() {
+                    @Override
+                    public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                        Log.e(TAG, "task chain completed, path:" + result.getPath());
+                    }
+                })
                 .start();
+        if (canceller != null) {
+            mPool.add(canceller.getName());
+        }
+    }
+
+    /**
+     * 简单的并行任务组使用
+     */
+    private void doConcurrentGroupTaskChain() {
+        final TaskChainEngine engine = TaskChainEngine.get();
+        ConcurrentGroupTaskStep group1 = ConcurrentGroupTaskStep.get("group1");
+        for (int i = 0; i < 5; i++) {
+            group1.addTask(XTaskStep.getTask(new SimpleTaskCommand(100 * (i + 1))));
+        }
+        ConcurrentGroupTaskStep group2 = ConcurrentGroupTaskStep.get("group2");
+        for (int i = 0; i < 5; i++) {
+            group2.addTask(XTaskStep.getTask(new SimpleTaskCommand(200 * (i + 1))));
+        }
+        ICanceller canceller = engine.addTask(group1)
+                .addTask(group2)
+                .setTaskChainCallback(new TaskChainCallbackAdapter() {
+                    @Override
+                    public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                        Log.e(TAG, "task chain completed, path:" + result.getPath());
+                    }
+                })
+                .start();
+        if (canceller != null) {
+            mPool.add(canceller.getName());
+        }
+    }
+
+
+    /**
+     * 任务执行失败，整个链路都停止工作
+     */
+    private void doTaskError() {
+        final TaskChainEngine engine = TaskChainEngine.get();
+        for (int i = 0; i < 5; i++) {
+            int finalI = i;
+            engine.addTask(XTaskStep.getTask(new TaskCommand() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (finalI == 2) {
+                        notifyTaskFailed(404, "执行出现异常!");
+                    } else {
+                        notifyTaskSucceed(TaskResult.succeed());
+                    }
+                }
+            }));
+        }
+        ICanceller canceller = engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
+            @Override
+            public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
+            }
+
+            @Override
+            public void onTaskChainError(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                Log.e(TAG, "task chain error, " + result.getDetailMessage());
+            }
+        }).start();
         if (canceller != null) {
             mPool.add(canceller.getName());
         }

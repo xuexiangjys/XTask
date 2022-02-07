@@ -73,7 +73,7 @@ public final class TaskLogger {
      * @return 打印日志TAG
      */
     public static String getLogTag(@NonNull Class<?> clazz) {
-        return TASK_LOG_TAG + "_" + clazz.getSimpleName();
+        return sTag + "_" + clazz.getSimpleName();
     }
 
     /**
@@ -83,7 +83,7 @@ public final class TaskLogger {
      * @return 打印日志TAG
      */
     public static String getLogTag(@NonNull String className) {
-        return TASK_LOG_TAG + "_" + className;
+        return sTag + "_" + className;
     }
 
     /**

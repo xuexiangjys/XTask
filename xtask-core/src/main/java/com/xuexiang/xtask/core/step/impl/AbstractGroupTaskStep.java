@@ -25,7 +25,9 @@ import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.IGroupTaskStep;
 import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.core.step.ITaskStepLifecycle;
+import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.utils.CommonUtils;
+import com.xuexiang.xtask.utils.TaskUtils;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -38,15 +40,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 2/1/22 11:27 PM
  */
 public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements ITaskStepLifecycle, IGroupTaskStep {
+
+    private static final String TAG = TaskLogger.getLogTag("AbstractGroupTaskStep");
+
     /**
      * 任务组的编号【静态全局】
      */
     private static final AtomicInteger GROUP_TASK_NUMBER = new AtomicInteger(1);
+
     /**
      * 任务组名称
      */
     private String mName;
-
     /**
      * 任务结果
      */
@@ -58,10 +63,20 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
     private List<ITaskStep> mTasks = new CopyOnWriteArrayList<>();
 
     /**
+     * 任务执行索引
+     */
+    protected AtomicInteger mTaskIndex = new AtomicInteger(0);
+
+    /**
+     * 任务执行总数
+     */
+    protected int mTaskTotalSize;
+
+    /**
      * 构造方法
      */
     public AbstractGroupTaskStep() {
-        mName = "GroupTaskStep-" + GROUP_TASK_NUMBER.getAndIncrement();;
+        mName = "GroupTaskStep-" + GROUP_TASK_NUMBER.getAndIncrement();
     }
 
     /**
@@ -108,6 +123,15 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
         super.setTaskParam(taskParam);
         mResult.updateParam(taskParam);
         return this;
+    }
+
+    /**
+     * 初始化组任务
+     */
+    protected void initGroupTask() {
+        mTaskTotalSize = TaskUtils.findTaskStepSize(getTasks());
+        mTaskIndex.set(0);
+        TaskLogger.dTag(TAG, getTaskLogName() + " initGroupTask, task total size:" + mTaskTotalSize);
     }
 
     @Override

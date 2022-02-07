@@ -17,6 +17,8 @@
 
 package com.xuexiang.xtask.core.step.impl;
 
+import androidx.annotation.NonNull;
+
 import com.xuexiang.xtask.core.ITaskChainCallback;
 import com.xuexiang.xtask.core.ITaskChainEngine;
 import com.xuexiang.xtask.core.param.ITaskResult;
@@ -35,22 +37,22 @@ public class TaskChainCallbackAdapter implements ITaskChainCallback {
     }
 
     @Override
-    public void onTaskChainStart(ITaskChainEngine engine) {
+    public void onTaskChainStart(@NonNull ITaskChainEngine engine) {
 
     }
 
     @Override
-    public void onTaskChainCompleted(ITaskChainEngine engine, ITaskResult result) {
+    public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
 
     }
 
     @Override
-    public void onTaskChainError(ITaskChainEngine engine, ITaskResult result) {
+    public void onTaskChainError(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
 
     }
 
     @Override
-    public void onTaskChainCancelled(ITaskChainEngine engine) {
+    public void onTaskChainCancelled(@NonNull ITaskChainEngine engine) {
 
     }
 }

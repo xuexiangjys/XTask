@@ -69,6 +69,7 @@ public class SerialGroupTaskStep extends AbstractGroupTaskStep {
     public void doTask() throws Exception {
         ITaskStep firstTaskStep = TaskUtils.findNextTaskStep(getTasks(), null);
         if (firstTaskStep != null) {
+            initGroupTask();
             firstTaskStep.prepareTask(getResult());
             ICancelable cancelable = TaskUtils.executeTask(firstTaskStep);
             firstTaskStep.setCancelable(cancelable);
@@ -79,7 +80,8 @@ public class SerialGroupTaskStep extends AbstractGroupTaskStep {
 
     @Override
     public void onTaskStepCompleted(@NonNull ITaskStep step, @NonNull ITaskResult result) {
-        getResult().saveResult(result);
+        getResult().saveResultNotPath(result);
+        getResult().addGroupPath(step.getName(), mTaskIndex.getAndIncrement(), mTaskTotalSize);
         ITaskStep nextTaskStep = TaskUtils.findNextTaskStep(getTasks(), step);
         if (nextTaskStep != null) {
             // 更新数据，将上一个task的结果更新到下一个task

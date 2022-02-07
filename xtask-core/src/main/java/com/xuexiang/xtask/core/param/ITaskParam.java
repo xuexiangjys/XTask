@@ -33,6 +33,15 @@ public interface ITaskParam extends IDataStore {
     void addPath(String path);
 
     /**
+     * 增加组任务路径
+     *
+     * @param path  任务路径
+     * @param index 任务索引
+     * @param total 总任务数
+     */
+    void addGroupPath(String path, int index, int total);
+
+    /**
      * 获取当前任务执行的全路径
      *
      * @return 当前任务执行的全路径

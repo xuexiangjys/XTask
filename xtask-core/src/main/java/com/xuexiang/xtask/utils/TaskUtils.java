@@ -84,6 +84,24 @@ public final class TaskUtils {
     }
 
     /**
+     * 查找需要执行的任务总数
+     *
+     * @param taskStepList 执行任务集合
+     * @return 需要执行的任务总数
+     */
+    public static int findTaskStepSize(List<ITaskStep> taskStepList) {
+        int count = 0;
+        if (!CommonUtils.isEmpty(taskStepList)) {
+            for (ITaskStep taskStep: taskStepList) {
+                if (taskStep != null && taskStep.accept()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
      * 执行任务
      *
      * @param taskStep 需要执行的任务

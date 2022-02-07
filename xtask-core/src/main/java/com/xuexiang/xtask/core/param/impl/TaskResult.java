@@ -161,6 +161,16 @@ public class TaskResult extends TaskParam implements ITaskResult {
     }
 
     @Override
+    public void saveResultNotPath(ITaskResult taskResult) {
+        if (taskResult == null) {
+            TaskLogger.eTag(TAG, "saveResultNotPath error, taskResult is null!");
+            return;
+        }
+        updateData(taskResult.getDataStore());
+        setResult(taskResult.getCode(), taskResult.getMessage());
+    }
+
+    @Override
     public String getDetailMessage() {
         return "[code]:" + mCode + ", [msg]:" + mMessage;
     }

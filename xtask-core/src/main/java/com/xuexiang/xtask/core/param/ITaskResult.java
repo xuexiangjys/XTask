@@ -65,6 +65,13 @@ public interface ITaskResult {
     void saveResult(ITaskResult taskResult);
 
     /**
+     * 保存执行结果，但是不保存执行路径
+     *
+     * @param taskResult 执行结果
+     */
+    void saveResultNotPath(ITaskResult taskResult);
+
+    /**
      * 更新参数
      *
      * @param taskParam 任务参数
