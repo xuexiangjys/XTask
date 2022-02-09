@@ -42,7 +42,7 @@ public class XTaskStep extends AbstractTaskStep {
     private static final AtomicInteger TASK_NUMBER = new AtomicInteger(1);
 
     /**
-     * 获取简化任务的构建者
+     * 获取简化的任务
      *
      * @param command 任务执行内容
      * @return 简化任务的构建者
@@ -52,7 +52,7 @@ public class XTaskStep extends AbstractTaskStep {
     }
 
     /**
-     * 获取简化任务的构建者
+     * 获取简化的任务
      *
      * @param command    任务执行内容
      * @param threadType 线程类型
@@ -65,7 +65,7 @@ public class XTaskStep extends AbstractTaskStep {
     }
 
     /**
-     * 获取简化任务的构建者
+     * 获取简化的任务
      *
      * @param command   任务执行内容
      * @param taskParam 任务参数
@@ -78,7 +78,7 @@ public class XTaskStep extends AbstractTaskStep {
     }
 
     /**
-     * 获取简化任务的构建者
+     * 获取简化的任务
      *
      * @param command    任务执行内容
      * @param threadType 线程类型

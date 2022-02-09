@@ -22,7 +22,7 @@ import android.content.Context;
 
 import androidx.multidex.MultiDex;
 
-import com.xuexiang.xtask.logger.TaskLogger;
+import com.xuexiang.xtask.XTask;
 import com.xuexiang.xtaskdemo.utils.sdkinit.UMengInit;
 import com.xuexiang.xtaskdemo.utils.sdkinit.XBasicLibInit;
 
@@ -44,7 +44,8 @@ public class MyApp extends Application {
         super.onCreate();
         initLibs();
 
-        TaskLogger.debug(isDebug());
+        // 设置XTask的调试模式
+        XTask.debug(isDebug());
     }
 
     /**
