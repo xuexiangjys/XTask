@@ -33,13 +33,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 这个只是一个空壳Fragment，只是用于演示而已
+ * 线程池测试页面
  *
  * @author xuexiang
  * @since 2019-07-08 00:52
  */
-@Page(name = "测试页面")
-public class TestFragment extends BaseSimpleListFragment {
+@Page(name = "线程池测试页面")
+public class TestThreadPoolFragment extends BaseSimpleListFragment {
 
     private static final String TAG = "TestFragment";
 

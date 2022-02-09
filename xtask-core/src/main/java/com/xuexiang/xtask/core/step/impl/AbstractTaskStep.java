@@ -85,6 +85,15 @@ public abstract class AbstractTaskStep implements ITaskStep {
     /**
      * 构造方法
      *
+     * @param threadType  线程类型
+     */
+    public AbstractTaskStep(ThreadType threadType) {
+        this(threadType, TaskParam.get(), null);
+    }
+
+    /**
+     * 构造方法
+     *
      * @param taskParam 任务参数
      */
     public AbstractTaskStep(@NonNull ITaskParam taskParam) {

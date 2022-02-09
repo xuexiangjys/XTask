@@ -194,6 +194,7 @@ public class TaskChainEngine implements ITaskChainEngine {
         onTaskChainStart();
         ITaskStep firstTaskStep = TaskUtils.findNextTaskStep(mTasks, null);
         if (firstTaskStep != null) {
+            firstTaskStep.prepareTask(mResult);
             ICancelable cancelable = TaskUtils.executeTask(firstTaskStep);
             firstTaskStep.setCancelable(cancelable);
         } else {

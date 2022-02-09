@@ -28,6 +28,8 @@ import com.xuexiang.xutil.XUtil;
 import com.xuexiang.xutil.common.ClickUtils;
 
 /**
+ * 主页面
+ *
  * @author xuexiang
  * @since 2018/11/7 下午1:16
  */
@@ -39,7 +41,8 @@ public class MainFragment extends BaseContainerFragment implements ClickUtils.On
         return new Class[]{
                 //此处填写fragment
                 XTaskStepFragment.class,
-                TestFragment.class
+                CustomTaskFragment.class,
+                TestThreadPoolFragment.class
         };
     }
 

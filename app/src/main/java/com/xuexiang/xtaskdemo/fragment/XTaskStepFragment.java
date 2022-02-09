@@ -124,9 +124,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 Log.e(TAG, "task chain error");
             }
         }).start();
-        if (canceller != null) {
-            mPool.add(canceller.getName());
-        }
+        addCanceller(canceller);
     }
 
     /**
@@ -134,13 +132,14 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
      */
     private void doParamTaskChain() {
         final TaskChainEngine engine = XTask.getTaskChain();
+        engine.setTaskParam(TaskParam.get("chainName", engine.getName()));
         TaskParam taskParam = TaskParam.get("param1", 100)
                 .put("param2", true);
         XTaskStep taskStep = XTask.getTask(new TaskCommand() {
             @Override
             public void run() {
                 ITaskParam param = getTaskParam();
-                Log.e(TAG, getName() + "  start, param1:" + param.get("param1"));
+                Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", chainName:" + param.get("chainName"));
                 param.put("param1", 200);
                 param.put("param3", "this is param3!");
                 notifyTaskSucceed();
@@ -166,9 +165,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 }
             }
         }).start();
-        if (canceller != null) {
-            mPool.add(canceller.getName());
-        }
+        addCanceller(canceller);
     }
 
     /**
@@ -193,9 +190,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                         Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
                     }
                 }).start();
-        if (canceller != null) {
-            mPool.add(canceller.getName());
-        }
+        addCanceller(canceller);
     }
 
     /**
@@ -220,9 +215,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                     }
                 })
                 .start();
-        if (canceller != null) {
-            mPool.add(canceller.getName());
-        }
+        addCanceller(canceller);
     }
 
     /**
@@ -247,9 +240,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                     }
                 })
                 .start();
-        if (canceller != null) {
-            mPool.add(canceller.getName());
-        }
+        addCanceller(canceller);
     }
 
 
@@ -287,11 +278,14 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 Log.e(TAG, "task chain error, " + result.getDetailMessage());
             }
         }).start();
+        addCanceller(canceller);
+    }
+
+    private void addCanceller(ICanceller canceller) {
         if (canceller != null) {
             mPool.add(canceller.getName());
         }
     }
-
 
     private static class SimpleTaskCommand extends TaskCommand {
 
@@ -310,6 +304,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 e.printStackTrace();
             }
             Log.e(TAG, getName() + "  end...");
+            // 任何任务无论失败还是成功，都需要调用notifyTaskSucceed或者notifyTaskFailed去通知任务链任务的完成情况
             notifyTaskSucceed(TaskResult.succeed());
         }
     }
