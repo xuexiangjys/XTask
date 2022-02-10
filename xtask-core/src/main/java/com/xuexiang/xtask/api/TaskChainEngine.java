@@ -25,6 +25,7 @@ import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.ITaskStep;
+import com.xuexiang.xtask.core.step.impl.AutoDestroyTaskChainCallback;
 import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.thread.pool.ICancelable;
 import com.xuexiang.xtask.thread.pool.ICanceller;
@@ -73,9 +74,9 @@ public class TaskChainEngine implements ITaskChainEngine {
     private List<ITaskStep> mTasks = new CopyOnWriteArrayList<>();
 
     /**
-     * 任务链执行回调
+     * 任务链执行回调, 默认回调处理是自动销毁任务链
      */
-    private ITaskChainCallback mTaskChainCallback;
+    private ITaskChainCallback mTaskChainCallback = new AutoDestroyTaskChainCallback();
 
     /**
      * 执行的时候，是否把取消者加入到缓存池中去
@@ -223,6 +224,7 @@ public class TaskChainEngine implements ITaskChainEngine {
         if (isDestroy()) {
             return;
         }
+        TaskLogger.dTag(TAG, getTaskChainName() + " destroy...");
         reset();
         mTaskChainCallback = null;
         mResult = null;

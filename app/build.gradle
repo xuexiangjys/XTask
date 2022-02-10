@@ -94,6 +94,7 @@ dependencies {
 
     // 任务库
     implementation project(':xtask-core')
+//    implementation 'com.github.xuexiangjys.XTask:xtask-core:0.0.1'
 
     implementation deps.androidx.multidex
     // 屏幕适配AutoSize
