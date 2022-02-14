@@ -74,6 +74,15 @@ public final class XTask {
         TaskLogger.setLogger(logger);
     }
 
+    /**
+     * 设置是否打印任务执行所在的线程名
+     *
+     * @param isLogTaskRunThreadName 是否打印任务执行所在的线程名
+     */
+    public static void setIsLogTaskRunThreadName(boolean isLogTaskRunThreadName) {
+        TaskLogger.setIsLogTaskRunThreadName(isLogTaskRunThreadName);
+    }
+
     //========================TaskChainEngine===============================//
 
     /**

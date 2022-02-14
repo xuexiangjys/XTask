@@ -78,6 +78,7 @@ XTask.debug(true);
 |---|---
 debug | 设置是否打开调试
 setLogger | 自定义日志打印
+setIsLogTaskRunThreadName | 设置是否打印任务执行所在的线程名，默认false
 getTaskChain | 获取任务链执行引擎
 getTask | 获取简化的任务
 getTaskBuilder | 获取简化任务的构建者
@@ -92,6 +93,50 @@ ioSubmit | 执行io耗时的异步任务
 groupSubmit | 执行分组异步任务
 
 ### 如何执行一条任务链
+
+下面是一整个完整的例子：
+
+```
+// 1.创建一条任务链（必须）
+final TaskChainEngine engine = XTask.getTaskChain();
+// 2.设置任务链的初始化参数（可选）
+engine.setTaskParam(TaskParam.get("chainName", engine.getName()));
+TaskParam taskParam = TaskParam.get("param1", 100)
+        .put("param2", true);
+// 3.创建多个任务，并向任务链中添加（必须）
+XTaskStep taskStep = XTask.getTask(new TaskCommand() {
+    @Override
+    public void run() {
+        ITaskParam param = getTaskParam();
+        Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", chainName:" + param.get("chainName"));
+        param.put("param1", 200);
+        param.put("param3", "this is param3!");
+        notifyTaskSucceed();
+    }
+}, taskParam);
+engine.addTask(taskStep)
+        .addTask(XTask.getTask(new TaskCommand() {
+            @Override
+            public void run() {
+                ITaskParam param = getTaskParam();
+                Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", param3:" + param.get("param3"));
+                param.put("param2", false);
+                notifyTaskSucceed();
+            }
+        }));
+// 4.设置任务链执行回调（可选）
+ICanceller canceller = engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
+    @Override
+    public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+        Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
+        Map<String, Object> data = result.getDataStore().getData();
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            Log.e(TAG, "key:" + entry.getKey() + ", value:" + entry.getValue());
+        }
+    }
+// 5.任务链执行（必须）
+}).start();
+```
 
 1.创建一条任务链.（必须）
 
@@ -157,7 +202,7 @@ engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
 })
 ```
 
-4.任务链执行.（必须）
+5.任务链执行.（必须）
 
 调用start执行任务链。
 
@@ -165,6 +210,183 @@ engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
 ICanceller canceller = engine.start();
 ```
 
+## 任务创建
+
+创建任务有两种方式：
+
+* 通过XTask.getTask构建
+* 继承AbstractTaskStep实现任务的自定义
+
+### 通过XTask创建
+
+> 通过XTask.getTask, 传入对应的属性进行构建
+
+属性名	| 描述
+|---|---
+name | 任务步骤名称
+command | 任务执行内容
+threadType | 线程执行类型
+taskParam | 任务参数
+taskHandler | 任务处理者
+
+```
+XTaskStep taskStep = XTask.getTask(new TaskCommand() {
+    @Override
+    public void run() {
+        // todo
+        notifyTaskSucceed();
+    }
+}, ThreadType.ASYNC, taskParam);
+```
+
+### 通过继承创建
+
+> 通过继承AbstractTaskStep或者SimpleTaskStep实现具体功能。
+
+```
+public class StepATask extends AbstractTaskStep {
+
+    @Override
+    public void doTask() throws Exception {
+        // todo
+        // 通知任务链任务完成
+        notifyTaskSucceed(TaskResult.succeed());
+    }
+
+    @Override
+    public String getName() {
+        return "StepATask";
+    }
+}
+
+```
+
+## 任务执行原则
+
+每一个任务都是依托于任务链进行流程控制。任何任务都需要遵循以下原则：
+
+* 任何任务无论失败还是成功，都需要调用`notifyTaskSucceed`或者`notifyTaskFailed`去通知任务链任务的完成情况。
+* 一旦任务链中某个任务执行失败，整个链路都停止工作。
+
+```
+final TaskChainEngine engine = XTask.getTaskChain();
+for (int i = 0; i < 5; i++) {
+    int finalI = i;
+    engine.addTask(XTask.getTask(new TaskCommand() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (finalI == 2) {
+                notifyTaskFailed(404, "执行出现异常!");
+            } else {
+                notifyTaskSucceed(TaskResult.succeed());
+            }
+        }
+    }));
+}
+engine.start();
+```
+
+## 参数传递
+
+* 任何TaskStep我们都可以通过`getTaskParam`获取任务参数和任务执行结果`ITaskParam`。
+* 上一个TaskStep保存处理过的任务参数会自动带入到下一个TaskStep中去，因此最后一个TaskStep拥有之前所有任务的参数数据。
+
+```
+XTask.getTask(new TaskCommand() {
+    @Override
+    public void run() {
+        ITaskParam param = getTaskParam();
+        Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", param3:" + param.get("param3"));
+        param.put("param2", false);
+        notifyTaskSucceed();
+    }
+})
+```
+
+## 线程控制
+
+设置任务的threadType类型，即可完成对任务运行线程的控制。目前支持6种线程处理方式。
+
+类型	| 描述
+|---|---
+MAIN | 主线程（UI线程）
+ASYNC | 异步线程（开子线程，普通线程池）
+ASYNC_IO | 异步线程（开子线程，io线程池）
+ASYNC_EMERGENT | 异步线程（开子线程，紧急线程池）
+ASYNC_BACKGROUND | 异步线程（开子线程，优先级较低线程池）
+SYNC | 同步线程（直接执行）
+
+```
+// 1.构造时传入线程
+XTaskStep taskStep = XTask.getTask(new SimpleTaskCommand(1000), ThreadType.ASYNC_EMERGENT);
+// 2.设置线程的方法
+taskStep.setThreadType(ThreadType.ASYNC_IO);
+```
+
+## 任务组
+
+目前共有串行任务组（SerialGroupTaskStep）和并行任务组（ConcurrentGroupTaskStep）
+
+### 串行任务组
+
+串行任务组是按顺序依次执行，和任务链的处理方式类似。使用XTask.getSerialGroupTask获取。
+
+```
+final TaskChainEngine engine = XTask.getTaskChain();
+SerialGroupTaskStep group1 = XTask.getSerialGroupTask("group1");
+for (int i = 0; i < 5; i++) {
+    group1.addTask(XTask.getTask(new SimpleTaskCommand(500)));
+}
+SerialGroupTaskStep group2 = XTask.getSerialGroupTask("group2");
+for (int i = 0; i < 5; i++) {
+    group2.addTask(XTask.getTask(new SimpleTaskCommand(1000)));
+}
+ICanceller canceller = engine.addTask(group1)
+        .addTask(group2)
+        .setTaskChainCallback(new TaskChainCallbackAdapter() {
+            @Override
+            public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                Log.e(TAG, "task chain completed, path:" + result.getPath());
+            }
+        })
+        .start();
+addCanceller(canceller);
+
+```
+
+### 并行任务组
+
+并行任务组是组内所有任务同时执行，待所有任务都完成后才视为任务组完成。使用XTask.getConcurrentGroupTask获取。
+
+```
+final TaskChainEngine engine = XTask.getTaskChain();
+ConcurrentGroupTaskStep group1 = XTask.getConcurrentGroupTask("group1");
+for (int i = 0; i < 5; i++) {
+    group1.addTask(XTask.getTask(new SimpleTaskCommand(100 * (i + 1))));
+}
+ConcurrentGroupTaskStep group2 = XTask.getConcurrentGroupTask("group2");
+for (int i = 0; i < 5; i++) {
+    group2.addTask(XTask.getTask(new SimpleTaskCommand(200 * (i + 1))));
+}
+ICanceller canceller = engine.addTask(group1)
+        .addTask(group2)
+        .setTaskChainCallback(new TaskChainCallbackAdapter() {
+            @Override
+            public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                Log.e(TAG, "task chain completed, path:" + result.getPath());
+            }
+        })
+        .start();
+addCanceller(canceller);
+
+```
+
+---
 
 ## 如果觉得项目还不错，可以考虑打赏一波
 

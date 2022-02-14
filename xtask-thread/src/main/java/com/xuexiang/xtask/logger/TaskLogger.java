@@ -64,6 +64,11 @@ public final class TaskLogger {
      */
     private static int sLogPriority = MAX_LOG_PRIORITY;
 
+    /**
+     * 是否打印任务执行所在的线程名
+     */
+    private static boolean sIsLogTaskRunThreadName = false;
+
     //==============属性设置================//
 
     /**
@@ -120,6 +125,24 @@ public final class TaskLogger {
      */
     public static void setPriority(int priority) {
         TaskLogger.sLogPriority = priority;
+    }
+
+    /**
+     * 设置是否打印任务执行所在的线程名
+     *
+     * @param isLogTaskRunThreadName 是否打印任务执行所在的线程名
+     */
+    public static void setIsLogTaskRunThreadName(boolean isLogTaskRunThreadName) {
+        TaskLogger.sIsLogTaskRunThreadName = isLogTaskRunThreadName;
+    }
+
+    /**
+     * 是否打印任务执行所在的线程名
+     *
+     * @return 是否打印任务执行所在的线程名
+     */
+    public static boolean isLogTaskRunThreadName() {
+        return sIsLogTaskRunThreadName;
     }
 
     //===================对外接口=======================//

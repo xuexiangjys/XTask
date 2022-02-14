@@ -85,7 +85,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
     /**
      * 构造方法
      *
-     * @param threadType  线程类型
+     * @param threadType 线程类型
      */
     public AbstractTaskStep(ThreadType threadType) {
         this(threadType, TaskParam.get(), null);
@@ -295,8 +295,16 @@ public abstract class AbstractTaskStep implements ITaskStep {
      */
     private void updateProcessTaskPath() {
         getTaskParam().addPath(getName());
-        TaskLogger.dTag(TAG, getTaskLogName() + " has run, path: " + getTaskParam().getPath());
+        TaskLogger.dTag(TAG, getTaskRunningDetailLogInfo());
         mIsPending.set(false);
+    }
+
+    private String getTaskRunningDetailLogInfo() {
+        if (TaskLogger.isLogTaskRunThreadName()) {
+            return getTaskLogName() + " has run, thread: " + Thread.currentThread().getName() + ", path:" + getTaskParam().getPath();
+        } else {
+            return getTaskLogName() + " has run, path: " + getTaskParam().getPath();
+        }
     }
 
     /**
