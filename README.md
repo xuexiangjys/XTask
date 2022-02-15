@@ -33,6 +33,32 @@
 * 支持任务链调用顺序记录和查询。
 * 支持自定义任务执行的线程池。
 
+## 设计思想
+
+框架主体使用责任链的设计模式，辅以建造者模式、工厂模式、适配器模式、组合模式、外观模式以及代理模式来实现。
+
+### 组成结构
+
+* 任务链`ITaskChainEngine`：任务链执行引擎，负责统筹调度各任务步骤。
+
+* 任务步骤`ITaskStep`：负责具体任务逻辑处理。
+
+* 数据存储仓库`IDataStore`：存放数据的仓库，主要用于保存任务参数中的数据。
+
+* 任务参数`ITaskParam`：负责任务路径记录以及任务产生的参数管理。
+
+* 任务执行结果`ITaskResult`：存放任务最终执行的结果以及产生的数据。
+
+* 任务组`IGroupTaskStep`：负责统筹调度各子任务步骤。
+
+[点击查看框架UML设计图](https://github.com/xuexiangjys/XTask/blob/master/art/xtask_uml.png)
+
+## 日志一览
+
+![task_log.png](https://s4.ax1x.com/2022/02/16/HWdTHJ.png)
+
+![task_log2.png](https://s4.ax1x.com/2022/02/16/HWwnbQ.png)
+
 ---
 
 ## 集成指南

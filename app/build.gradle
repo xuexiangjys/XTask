@@ -10,7 +10,7 @@ android {
     buildToolsVersion build_versions.build_tools
 
     defaultConfig {
-        applicationId "com.xuexiang.templateproject"
+        applicationId "com.xuexiang.xtaskdemo"
         minSdkVersion 17
         targetSdkVersion build_versions.target_sdk
         versionCode 1
