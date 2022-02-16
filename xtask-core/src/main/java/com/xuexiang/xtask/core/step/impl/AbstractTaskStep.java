@@ -23,6 +23,7 @@ import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
+import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.core.step.ITaskStepHandler;
 import com.xuexiang.xtask.core.step.ITaskStepLifecycle;
@@ -79,7 +80,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
      * 构造方法
      */
     public AbstractTaskStep() {
-        this(ThreadType.ASYNC, TaskParam.get(), null);
+        this(ThreadType.ASYNC, TaskParam.get());
     }
 
     /**
@@ -88,7 +89,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
      * @param threadType 线程类型
      */
     public AbstractTaskStep(ThreadType threadType) {
-        this(threadType, TaskParam.get(), null);
+        this(threadType, TaskParam.get());
     }
 
     /**
@@ -97,49 +98,34 @@ public abstract class AbstractTaskStep implements ITaskStep {
      * @param taskParam 任务参数
      */
     public AbstractTaskStep(@NonNull ITaskParam taskParam) {
-        this(ThreadType.ASYNC, taskParam, null);
+        this(ThreadType.ASYNC, taskParam);
     }
 
     /**
      * 构造方法
      *
-     * @param taskHandler 任务执行处理者
+     * @param threadType 线程类型
+     * @param taskParam  任务参数
      */
-    public AbstractTaskStep(ITaskStepHandler taskHandler) {
-        this(ThreadType.ASYNC, TaskParam.get(), taskHandler);
-    }
-
-    /**
-     * 构造方法
-     *
-     * @param taskParam   任务参数
-     * @param taskHandler 任务执行处理者
-     */
-    public AbstractTaskStep(@NonNull ITaskParam taskParam, ITaskStepHandler taskHandler) {
-        this(ThreadType.ASYNC, taskParam, taskHandler);
-    }
-
-    /**
-     * 构造方法
-     *
-     * @param threadType  线程类型
-     * @param taskParam   任务参数
-     * @param taskHandler 任务执行处理者
-     */
-    public AbstractTaskStep(ThreadType threadType, @NonNull ITaskParam taskParam, ITaskStepHandler taskHandler) {
+    public AbstractTaskStep(ThreadType threadType, @NonNull ITaskParam taskParam) {
         mThreadType = threadType;
         mTaskParam = taskParam;
-        mTaskHandler = taskHandler;
     }
 
     @Override
-    public AbstractTaskStep setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle) {
+    public AbstractTaskStep setTaskStepLifecycle(@NonNull ITaskStepLifecycle taskStepLifecycle) {
         mTaskStepLifecycle = taskStepLifecycle;
         return this;
     }
 
     @Override
-    public AbstractTaskStep setThreadType(ThreadType threadType) {
+    public AbstractTaskStep setTaskStepHandler(@NonNull ITaskStepHandler taskStepHandler) {
+        mTaskHandler = taskStepHandler;
+        return this;
+    }
+
+    @Override
+    public AbstractTaskStep setThreadType(@NonNull ThreadType threadType) {
         mThreadType = threadType;
         return this;
     }
@@ -150,6 +136,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
         return this;
     }
 
+    @NonNull
     @Override
     public ThreadType getThreadType() {
         return mThreadType;
@@ -269,6 +256,9 @@ public abstract class AbstractTaskStep implements ITaskStep {
             processTask();
         } catch (Exception e) {
             TaskLogger.eTag(TAG, getTaskLogName() + " has error！", e);
+            if (mTaskHandler != null) {
+                mTaskHandler.onTaskException(this, e);
+            }
         }
     }
 
@@ -314,6 +304,41 @@ public abstract class AbstractTaskStep implements ITaskStep {
      */
     protected String getTaskLogName() {
         return "Task step [" + getName() + "]";
+    }
+
+    // ==================默认提供的通知方法=========================//
+
+    /**
+     * 通知任务链任务步骤执行完毕
+     */
+    public void notifyTaskSucceed() {
+        notifyTaskSucceed(TaskResult.succeed());
+    }
+
+    /**
+     * 通知任务链任务步骤执行失败
+     */
+    public void notifyTaskFailed() {
+        notifyTaskFailed(TaskResult.failed());
+    }
+
+    /**
+     * 通知任务链任务步骤执行失败
+     *
+     * @param code 失败的错误码
+     */
+    public void notifyTaskFailed(int code) {
+        notifyTaskFailed(TaskResult.failed(code));
+    }
+
+    /**
+     * 通知任务链任务步骤执行失败
+     *
+     * @param code    失败的错误码
+     * @param message 错误信息
+     */
+    public void notifyTaskFailed(int code, String message) {
+        notifyTaskFailed(TaskResult.failed(code, message));
     }
 
 }

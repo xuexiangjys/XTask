@@ -36,6 +36,11 @@ public interface ITaskResult {
     int ERROR = -1;
 
     /**
+     * 任务执行过程中发生异常
+     */
+    int PROCESS_TASK_THROW_EXCEPTION = -2;
+
+    /**
      * 获取任务结果码
      *
      * @return 任务结果码

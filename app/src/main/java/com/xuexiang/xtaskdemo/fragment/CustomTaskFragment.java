@@ -115,7 +115,6 @@ public class CustomTaskFragment extends BaseSimpleListFragment {
                             e.printStackTrace();
                         }
                         getTaskParam().put(StepATask.KEY_TOTAL, 123);
-                        notifyTaskSucceed(TaskResult.succeed());
                     }
                 })
                 .addTask(new SimpleTaskStep("TaskStep2", ThreadType.SYNC) {
@@ -130,7 +129,6 @@ public class CustomTaskFragment extends BaseSimpleListFragment {
                         }
                         ITaskParam param = getTaskParam();
                         param.put(StepATask.KEY_TOTAL, param.getInt(StepATask.KEY_TOTAL) + 321);
-                        notifyTaskSucceed(TaskResult.succeed());
                     }
                 })
                 .setTaskChainCallback(new TaskChainCallbackAdapter() {

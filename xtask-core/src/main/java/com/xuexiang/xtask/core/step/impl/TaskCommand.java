@@ -31,7 +31,7 @@ import com.xuexiang.xtask.core.step.ITaskStepController;
  * @author xuexiang
  * @since 1/31/22 2:28 AM
  */
-public abstract class TaskCommand implements Runnable, ITaskStepController {
+public abstract class TaskCommand implements ITaskStepController {
 
     /**
      * 任务步骤执行控制器
@@ -106,6 +106,13 @@ public abstract class TaskCommand implements Runnable, ITaskStepController {
     public ITaskParam getTaskParam() {
         return mController != null ? mController.getTaskParam() : TaskParam.get();
     }
+
+    /**
+     * 执行任务
+     *
+     * @throws Exception 异常
+     */
+    public abstract void run() throws Exception;
 
     @Override
     public void recycle() {

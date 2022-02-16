@@ -17,6 +17,8 @@
 
 package com.xuexiang.xtask.core.step;
 
+import androidx.annotation.NonNull;
+
 /**
  * 任务处理者
  *
@@ -30,14 +32,22 @@ public interface ITaskStepHandler {
      *
      * @param step 任务
      */
-    void beforeTask(ITaskStep step);
+    void beforeTask(@NonNull ITaskStep step);
 
     /**
      * 任务执行完毕的处理
      *
      * @param step 任务
      */
-    void afterTask(ITaskStep step);
+    void afterTask(@NonNull ITaskStep step);
+
+    /**
+     * 任务执行发生异常
+     *
+     * @param step      任务
+     * @param exception 异常
+     */
+    void onTaskException(@NonNull ITaskStep step, Exception exception);
 
     /**
      * 是否接收执行任务
@@ -45,27 +55,27 @@ public interface ITaskStepHandler {
      * @param step 任务
      * @return true：执行；false：不执行
      */
-    boolean accept(ITaskStep step);
+    boolean accept(@NonNull ITaskStep step);
 
     /**
      * 任务执行完成的处理
      *
      * @param step 任务
      */
-    void handleTaskSucceed(ITaskStep step);
+    void handleTaskSucceed(@NonNull ITaskStep step);
 
     /**
      * 任务执行失败的处理
      *
      * @param step 任务
      */
-    void handleTaskFailed(ITaskStep step);
+    void handleTaskFailed(@NonNull ITaskStep step);
 
     /**
      * 任务执行被取消的处理
      *
      * @param step 任务
      */
-    void handleTaskCancelled(ITaskStep step);
+    void handleTaskCancelled(@NonNull ITaskStep step);
 
 }

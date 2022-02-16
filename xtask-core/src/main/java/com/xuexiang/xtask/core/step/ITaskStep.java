@@ -38,7 +38,15 @@ public interface ITaskStep extends Runnable, ICancelable, ITaskStepController {
      * @param taskStepLifecycle 任务步骤的生命周期
      * @return 任务步骤
      */
-    ITaskStep setTaskStepLifecycle(ITaskStepLifecycle taskStepLifecycle);
+    ITaskStep setTaskStepLifecycle(@NonNull ITaskStepLifecycle taskStepLifecycle);
+
+    /**
+     * 设置任务处理者
+     *
+     * @param taskStepHandler 任务处理者
+     * @return 任务步骤
+     */
+    ITaskStep setTaskStepHandler(@NonNull ITaskStepHandler taskStepHandler);
 
     /**
      * 设置执行的线程类型
@@ -46,7 +54,7 @@ public interface ITaskStep extends Runnable, ICancelable, ITaskStepController {
      * @param threadType 线程类型
      * @return 任务步骤
      */
-    ITaskStep setThreadType(ThreadType threadType);
+    ITaskStep setThreadType(@NonNull ThreadType threadType);
 
     /**
      * 设置执行的任务参数
@@ -61,6 +69,7 @@ public interface ITaskStep extends Runnable, ICancelable, ITaskStepController {
      *
      * @return 线程类型
      */
+    @NonNull
     ThreadType getThreadType();
 
     /**

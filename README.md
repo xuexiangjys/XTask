@@ -137,7 +137,6 @@ XTaskStep taskStep = XTask.getTask(new TaskCommand() {
         Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", chainName:" + param.get("chainName"));
         param.put("param1", 200);
         param.put("param3", "this is param3!");
-        notifyTaskSucceed();
     }
 }, taskParam);
 engine.addTask(taskStep)
@@ -147,7 +146,6 @@ engine.addTask(taskStep)
                 ITaskParam param = getTaskParam();
                 Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", param3:" + param.get("param3"));
                 param.put("param2", false);
-                notifyTaskSucceed();
             }
         }));
 // 4.设置任务链执行回调（可选）
@@ -186,7 +184,6 @@ XTaskStep taskStep = XTask.getTask(new TaskCommand() {
     @Override
     public void run() {
         // ...执行任务
-        notifyTaskSucceed();
     }
 }, taskParam);
 engine.addTask(taskStep)
@@ -194,12 +191,11 @@ engine.addTask(taskStep)
             @Override
             public void run() {
                 // ...执行任务
-                notifyTaskSucceed();
             }
         }));
 ```
 【注意】:如果任务执行成功，就调用`notifyTaskSucceed`，任务执行失败，就调用`notifyTaskFailed`。这里任务无论成功还是失败，只要执行完成都需要调用`notifyTaskXXX`通知任务链该任务完成，否则任务将无法正常执行。
-
+【注意】:`TaskCommand`和`SimpleTaskStep`默认提供了自动通知执行结果的功能，但是AbstractTaskStep没有提供，需要手动通知。
 
 4.设置任务链执行回调.（可选）
 
@@ -260,7 +256,6 @@ XTaskStep taskStep = XTask.getTask(new TaskCommand() {
     @Override
     public void run() {
         // todo
-        notifyTaskSucceed();
     }
 }, ThreadType.ASYNC, taskParam);
 ```
@@ -291,7 +286,7 @@ public class StepATask extends AbstractTaskStep {
 
 每一个任务都是依托于任务链进行流程控制。任何任务都需要遵循以下原则：
 
-* 任何任务无论失败还是成功，都需要调用`notifyTaskSucceed`或者`notifyTaskFailed`去通知任务链任务的完成情况。
+* 任何任务无论失败还是成功，都需要调用`notifyTaskSucceed`或者`notifyTaskFailed`去通知任务链任务的完成情况。`TaskCommand`和`SimpleTaskStep`默认提供了自动通知执行结果的功能。
 * 一旦任务链中某个任务执行失败，整个链路都停止工作。
 
 ```
@@ -307,12 +302,12 @@ for (int i = 0; i < 5; i++) {
                 e.printStackTrace();
             }
             if (finalI == 2) {
-                notifyTaskFailed(404, "执行出现异常!");
+                notifyTaskFailed(404, "任务执行失败!");
             } else {
                 notifyTaskSucceed(TaskResult.succeed());
             }
         }
-    }));
+    }, false));
 }
 engine.start();
 ```
@@ -329,7 +324,6 @@ XTask.getTask(new TaskCommand() {
         ITaskParam param = getTaskParam();
         Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", param3:" + param.get("param3"));
         param.put("param2", false);
-        notifyTaskSucceed();
     }
 })
 ```

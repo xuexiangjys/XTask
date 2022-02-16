@@ -21,10 +21,12 @@ import androidx.annotation.NonNull;
 
 import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskParam;
+import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
 import com.xuexiang.xtask.core.step.ITaskStepHandler;
 import com.xuexiang.xtask.core.step.impl.AbstractTaskStep;
 import com.xuexiang.xtask.core.step.impl.TaskCommand;
+import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.utils.CommonUtils;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +38,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1/30/22 5:08 PM
  */
 public class XTaskStep extends AbstractTaskStep {
+
+    private static final String TAG = TaskLogger.getLogTag("XTaskStep");
+
     /**
      * 任务的编号【静态全局】
      */
@@ -49,6 +54,17 @@ public class XTaskStep extends AbstractTaskStep {
      */
     public static XTaskStep getTask(@NonNull TaskCommand command) {
         return new Builder(command).build();
+    }
+
+    /**
+     * 获取简化的任务
+     *
+     * @param command      任务执行内容
+     * @param isAutoNotify 是否自动通知任务成功或者失败
+     * @return 简化任务的构建者
+     */
+    public static XTaskStep getTask(@NonNull TaskCommand command, boolean isAutoNotify) {
+        return new Builder(command).setIsAutoNotify(isAutoNotify).build();
     }
 
     /**
@@ -113,19 +129,27 @@ public class XTaskStep extends AbstractTaskStep {
     private TaskCommand mTaskCommand;
 
     /**
+     * 是否自动通知任务成功或者失败
+     */
+    private boolean mIsAutoNotify;
+
+    /**
      * 构造方法
      *
-     * @param name        任务步骤名称
-     * @param command     任务执行内容
-     * @param threadType  线程类型
-     * @param taskParam   任务参数
-     * @param taskHandler 任务处理者
+     * @param name         任务步骤名称
+     * @param command      任务执行内容
+     * @param threadType   线程类型
+     * @param taskParam    任务参数
+     * @param taskHandler  任务处理者
+     * @param isAutoNotify 是否自动通知任务成功或者失败
      */
-    private XTaskStep(@NonNull String name, @NonNull TaskCommand command, ThreadType threadType, @NonNull ITaskParam taskParam, ITaskStepHandler taskHandler) {
-        super(threadType, taskParam, taskHandler);
+    private XTaskStep(@NonNull String name, @NonNull TaskCommand command, ThreadType threadType, @NonNull ITaskParam taskParam, ITaskStepHandler taskHandler, boolean isAutoNotify) {
+        super(threadType, taskParam);
         mName = name;
         mTaskCommand = command;
         mTaskCommand.setTaskStepResultController(this);
+        mIsAutoNotify = isAutoNotify;
+        setTaskStepHandler(taskHandler);
     }
 
     @Override
@@ -135,7 +159,18 @@ public class XTaskStep extends AbstractTaskStep {
 
     @Override
     public void doTask() throws Exception {
-        mTaskCommand.run();
+        if (mIsAutoNotify) {
+            try {
+                mTaskCommand.run();
+            } catch (Exception e) {
+                TaskLogger.eTag(TAG, getTaskLogName() + " has error！", e);
+                notifyTaskFailed(ITaskResult.PROCESS_TASK_THROW_EXCEPTION, e.getMessage());
+                return;
+            }
+            mTaskCommand.notifyTaskSucceed();
+        } else {
+            mTaskCommand.run();
+        }
     }
 
     /**
@@ -165,6 +200,10 @@ public class XTaskStep extends AbstractTaskStep {
          * 任务处理者
          */
         ITaskStepHandler taskHandler;
+        /**
+         * 是否自动通知任务成功或者失败
+         */
+        boolean isAutoNotify = true;
 
         /**
          * 构造方法
@@ -200,6 +239,11 @@ public class XTaskStep extends AbstractTaskStep {
             return this;
         }
 
+        public Builder setIsAutoNotify(boolean isAutoNotify) {
+            this.isAutoNotify = isAutoNotify;
+            return this;
+        }
+
         public XTaskStep build() {
             CommonUtils.requireNonNull(this.command, "XTaskStep.Builder command can not be null!");
 
@@ -209,7 +253,7 @@ public class XTaskStep extends AbstractTaskStep {
             if (taskParam == null) {
                 taskParam = new TaskParam();
             }
-            return new XTaskStep(name, command, threadType, taskParam, taskHandler);
+            return new XTaskStep(name, command, threadType, taskParam, taskHandler, isAutoNotify);
         }
     }
 

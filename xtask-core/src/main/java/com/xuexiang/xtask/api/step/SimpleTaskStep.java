@@ -21,8 +21,8 @@ import androidx.annotation.NonNull;
 
 import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskParam;
-import com.xuexiang.xtask.core.step.ITaskStepHandler;
 import com.xuexiang.xtask.core.step.impl.AbstractTaskStep;
+import com.xuexiang.xtask.core.step.impl.AutoNotifyTaskStepHandler;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,7 +54,7 @@ public abstract class SimpleTaskStep extends AbstractTaskStep {
      * @param name 任务名称
      */
     public SimpleTaskStep(String name) {
-        mName = name;
+        initTaskStep(name);
     }
 
     /**
@@ -65,7 +65,7 @@ public abstract class SimpleTaskStep extends AbstractTaskStep {
      */
     public SimpleTaskStep(String name, ThreadType threadType) {
         super(threadType);
-        mName = name;
+        initTaskStep(name);
     }
 
     /**
@@ -76,47 +76,45 @@ public abstract class SimpleTaskStep extends AbstractTaskStep {
      */
     public SimpleTaskStep(String name, @NonNull ITaskParam taskParam) {
         super(taskParam);
-        mName = name;
+        initTaskStep(name);
     }
 
     /**
      * 构造方法
      *
-     * @param name        任务名称
-     * @param taskHandler 任务执行处理者
+     * @param name       任务名称
+     * @param threadType 线程类型
+     * @param taskParam  任务参数
      */
-    public SimpleTaskStep(String name, ITaskStepHandler taskHandler) {
-        super(taskHandler);
-        mName = name;
+    public SimpleTaskStep(String name, ThreadType threadType, @NonNull ITaskParam taskParam) {
+        super(threadType, taskParam);
+        initTaskStep(name);
     }
 
     /**
-     * 构造方法
+     * 初始化任务步骤
      *
-     * @param name        任务名称
-     * @param taskParam   任务参数
-     * @param taskHandler 任务执行处理者
+     * @param name 任务步骤名
      */
-    public SimpleTaskStep(String name, @NonNull ITaskParam taskParam, ITaskStepHandler taskHandler) {
-        super(taskParam, taskHandler);
+    protected void initTaskStep(String name) {
         mName = name;
+        if (isAutoNotify()) {
+            setTaskStepHandler(new AutoNotifyTaskStepHandler());
+        }
     }
 
-    /**
-     * 构造方法
-     *
-     * @param name        任务名称
-     * @param threadType  线程类型
-     * @param taskParam   任务参数
-     * @param taskHandler 任务执行处理者
-     */
-    public SimpleTaskStep(String name, ThreadType threadType, @NonNull ITaskParam taskParam, ITaskStepHandler taskHandler) {
-        super(threadType, taskParam, taskHandler);
-        mName = name;
-    }
 
     @Override
     public String getName() {
         return mName;
+    }
+
+    /**
+     * 是否自动通知执行结果【需要手动控制的请设置false】
+     *
+     * @return 是否自动通知执行结果
+     */
+    protected boolean isAutoNotify() {
+        return true;
     }
 }

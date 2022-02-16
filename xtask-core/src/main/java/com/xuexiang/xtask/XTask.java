@@ -119,6 +119,17 @@ public final class XTask {
     /**
      * 获取简化的任务
      *
+     * @param command      任务执行内容
+     * @param isAutoNotify 是否自动通知任务成功或者失败
+     * @return 简化任务的构建者
+     */
+    public static XTaskStep getTask(@NonNull TaskCommand command, boolean isAutoNotify) {
+        return XTaskStep.getTask(command, isAutoNotify);
+    }
+
+    /**
+     * 获取简化的任务
+     *
      * @param command    任务执行内容
      * @param threadType 线程类型
      * @return 简化任务的构建者

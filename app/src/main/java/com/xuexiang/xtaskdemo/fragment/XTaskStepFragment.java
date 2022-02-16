@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * 使用XTaskStep可以让你使用起来更方便
+ *
  * @author xuexiang
  * @since 1/20/22 12:24 AM
  */
@@ -63,6 +65,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
         lists.add("简单的串行任务组使用");
         lists.add("简单的并行任务组使用");
         lists.add("任务执行失败");
+        lists.add("任务执行发生异常");
         return lists;
     }
 
@@ -85,7 +88,10 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 doConcurrentGroupTaskChain();
                 break;
             case 5:
-                doTaskError();
+                doTaskFailed();
+                break;
+            case 6:
+                doTaskException();
                 break;
             default:
                 break;
@@ -142,7 +148,6 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", chainName:" + param.get("chainName"));
                 param.put("param1", 200);
                 param.put("param3", "this is param3!");
-                notifyTaskSucceed();
             }
         }, taskParam);
         engine.addTask(taskStep)
@@ -152,7 +157,6 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                         ITaskParam param = getTaskParam();
                         Log.e(TAG, getName() + "  start, param1:" + param.get("param1") + ", param3:" + param.get("param3"));
                         param.put("param2", false);
-                        notifyTaskSucceed();
                     }
                 }));
         ICanceller canceller = engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
@@ -247,7 +251,7 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
     /**
      * 任务执行失败，整个链路都停止工作
      */
-    private void doTaskError() {
+    private void doTaskFailed() {
         final TaskChainEngine engine = XTask.getTaskChain();
         for (int i = 0; i < 5; i++) {
             int finalI = i;
@@ -260,9 +264,41 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                         e.printStackTrace();
                     }
                     if (finalI == 2) {
-                        notifyTaskFailed(404, "执行出现异常!");
+                        notifyTaskFailed(404, "任务执行失败!");
                     } else {
                         notifyTaskSucceed(TaskResult.succeed());
+                    }
+                }
+            }, false));
+        }
+        ICanceller canceller = engine.setTaskChainCallback(new TaskChainCallbackAdapter() {
+            @Override
+            public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName());
+            }
+
+            @Override
+            public void onTaskChainError(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                Log.e(TAG, "task chain error, " + result.getDetailMessage());
+            }
+        }).start();
+        addCanceller(canceller);
+    }
+
+    private void doTaskException() {
+        final TaskChainEngine engine = XTask.getTaskChain();
+        for (int i = 0; i < 5; i++) {
+            int finalI = i;
+            engine.addTask(XTask.getTask(new TaskCommand() {
+                @Override
+                public void run() throws Exception {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (finalI == 2) {
+                        throw new Exception("执行出现异常!");
                     }
                 }
             }));
@@ -304,8 +340,6 @@ public class XTaskStepFragment extends BaseSimpleListFragment {
                 e.printStackTrace();
             }
             Log.e(TAG, getName() + "  end...");
-            // 任何任务无论失败还是成功，都需要调用notifyTaskSucceed或者notifyTaskFailed去通知任务链任务的完成情况
-            notifyTaskSucceed(TaskResult.succeed());
         }
     }
 

@@ -43,4 +43,9 @@ public class JobTask extends SimpleTaskStep {
     public void doTask() throws Exception {
         new Job(this).run();
     }
+
+    @Override
+    protected boolean isAutoNotify() {
+        return false;
+    }
 }
