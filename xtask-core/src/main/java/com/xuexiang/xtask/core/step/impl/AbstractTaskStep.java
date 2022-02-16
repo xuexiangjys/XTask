@@ -55,6 +55,10 @@ public abstract class AbstractTaskStep implements ITaskStep {
      */
     private AtomicBoolean mIsCancelled = new AtomicBoolean(false);
     /**
+     * 是否已经通知执行结果
+     */
+    private AtomicBoolean mIsNotified = new AtomicBoolean(false);
+    /**
      * 任务步骤的生命周期管理
      */
     private ITaskStepLifecycle mTaskStepLifecycle;
@@ -183,6 +187,11 @@ public abstract class AbstractTaskStep implements ITaskStep {
 
     @Override
     public void notifyTaskSucceed(@NonNull ITaskResult result) {
+        if (mIsNotified.get()) {
+            TaskLogger.wTag(TAG, getTaskLogName() + " has notified！");
+            return;
+        }
+        mIsNotified.set(true);
         mIsRunning.set(false);
         if (isCancelled()) {
             TaskLogger.wTag(TAG, getTaskLogName() + " has cancelled！");
@@ -200,6 +209,11 @@ public abstract class AbstractTaskStep implements ITaskStep {
 
     @Override
     public void notifyTaskFailed(@NonNull ITaskResult result) {
+        if (mIsNotified.get()) {
+            TaskLogger.wTag(TAG, getTaskLogName() + " has notified！");
+            return;
+        }
+        mIsNotified.set(true);
         mIsRunning.set(false);
         TaskLogger.eTag(TAG, getTaskLogName() + " failed, " + result.getDetailMessage());
         if (mTaskHandler != null) {
