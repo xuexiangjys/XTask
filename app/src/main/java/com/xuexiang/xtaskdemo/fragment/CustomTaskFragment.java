@@ -48,7 +48,7 @@ import java.util.Set;
  * @author xuexiang
  * @since 2/1/22 11:07 PM
  */
-@Page(name = "自定义任务使用\n通过继承AbstractTaskStep实现")
+@Page(name = "自定义任务使用\n通过继承SimpleTaskStep/AbstractTaskStep实现")
 public class CustomTaskFragment extends BaseSimpleListFragment {
 
     public static final String TAG = "CustomTaskFragment";
@@ -57,8 +57,8 @@ public class CustomTaskFragment extends BaseSimpleListFragment {
 
     @Override
     protected List<String> initSimpleData(List<String> lists) {
-        lists.add("简单继承AbstractTaskStep使用");
         lists.add("简单继承SimpleTaskStep使用");
+        lists.add("简单继承AbstractTaskStep使用");
         lists.add("复杂任务使用");
         return lists;
     }
@@ -67,10 +67,10 @@ public class CustomTaskFragment extends BaseSimpleListFragment {
     protected void onItemClick(int position) {
         switch (position) {
             case 0:
-                doSimpleAbstractTaskStep();
+                doSimpleTaskStep();
                 break;
             case 1:
-                doSimpleTaskStep();
+                doSimpleAbstractTaskStep();
                 break;
             case 2:
                 doComplexTaskStep();
@@ -79,24 +79,6 @@ public class CustomTaskFragment extends BaseSimpleListFragment {
                 break;
         }
     }
-
-    /**
-     * 简单继承AbstractTaskStep使用
-     */
-    private void doSimpleAbstractTaskStep() {
-        final TaskChainEngine engine = XTask.getTaskChain();
-        ICanceller canceller = engine.addTask(new StepATask())
-                .addTask(new StepBTask())
-                .setTaskChainCallback(new TaskChainCallbackAdapter() {
-                    @Override
-                    public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
-                        Log.e(TAG, "task chain completed, result:" + result.getDataStore().getInt(StepATask.KEY_TOTAL));
-                    }
-                })
-                .start();
-        addCanceller(canceller);
-    }
-
 
     /**
      * 简单继承SimpleTaskStep使用
@@ -129,12 +111,36 @@ public class CustomTaskFragment extends BaseSimpleListFragment {
                         }
                         ITaskParam param = getTaskParam();
                         param.put(StepATask.KEY_TOTAL, param.getInt(StepATask.KEY_TOTAL) + 321);
+                        notifyTaskSucceed();
+                    }
+
+                    @Override
+                    protected boolean isAutoNotify() {
+                        // 设置手动通知执行结果
+                        return false;
                     }
                 })
                 .setTaskChainCallback(new TaskChainCallbackAdapter() {
                     @Override
                     public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
                         Log.e(TAG, "task chain completed, thread:" + Thread.currentThread().getName() + ", result:" + result.getDataStore().getInt(StepATask.KEY_TOTAL));
+                    }
+                })
+                .start();
+        addCanceller(canceller);
+    }
+
+    /**
+     * 简单继承AbstractTaskStep使用
+     */
+    private void doSimpleAbstractTaskStep() {
+        final TaskChainEngine engine = XTask.getTaskChain();
+        ICanceller canceller = engine.addTask(new StepATask())
+                .addTask(new StepBTask())
+                .setTaskChainCallback(new TaskChainCallbackAdapter() {
+                    @Override
+                    public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                        Log.e(TAG, "task chain completed, result:" + result.getDataStore().getInt(StepATask.KEY_TOTAL));
                     }
                 })
                 .start();

@@ -82,7 +82,7 @@ allprojects {
 dependencies {
   ...
   // XTask
-  implementation 'com.github.xuexiangjys:XTask:xtask-core:0.0.1'
+  implementation 'com.github.xuexiangjys:XTask:xtask-core:1.0.0'
 }
 ```
 
@@ -237,7 +237,7 @@ ICanceller canceller = engine.start();
 创建任务有两种方式：
 
 * 通过XTask.getTask构建
-* 继承AbstractTaskStep实现任务的自定义
+* 继承`SimpleTaskStep`/`AbstractTaskStep`实现任务的自定义
 
 ### 通过XTask创建
 
@@ -262,10 +262,18 @@ XTaskStep taskStep = XTask.getTask(new TaskCommand() {
 
 ### 通过继承创建
 
-> 通过继承AbstractTaskStep或者SimpleTaskStep实现具体功能。
+> 通过继承`SimpleTaskStep`或者`AbstractTaskStep`实现具体功能。
 
 ```
-public class StepATask extends AbstractTaskStep {
+public class StepATask extends SimpleTaskStep {
+
+    @Override
+    public void doTask() throws Exception {
+        // todo
+    }
+}
+
+public class StepBTask extends AbstractTaskStep {
 
     @Override
     public void doTask() throws Exception {
@@ -289,6 +297,16 @@ public class StepATask extends AbstractTaskStep {
 * 任何任务无论失败还是成功，都需要调用`notifyTaskSucceed`或者`notifyTaskFailed`去通知任务链任务的完成情况。`TaskCommand`和`SimpleTaskStep`默认提供了自动通知执行结果的功能。
 * 一旦任务链中某个任务执行失败，整个链路都停止工作。
 
+任务类型	| 任务执行说明
+|---|---
+TaskCommand | 自动通知执行结果。如需手动通知，只需设置`isAutoNotify`为false即可
+SimpleTaskStep | 自动通知执行结果。如需手动通知，只需重写`isAutoNotify`方法为false即可
+AbstractTaskStep | 需手动通知执行结果
+
+### TaskCommand手动通知执行结果
+
+在通过XTask.getTask传入TaskCommand构建Task的时候，设置`isAutoNotify`为false即可手动通知执行结果。
+
 ```
 final TaskChainEngine engine = XTask.getTaskChain();
 for (int i = 0; i < 5; i++) {
@@ -307,10 +325,32 @@ for (int i = 0; i < 5; i++) {
                 notifyTaskSucceed(TaskResult.succeed());
             }
         }
-    }, false));
+    }, false)); // 设置手动通知执行结果
 }
 engine.start();
 ```
+
+### SimpleTaskStep手动通知执行结果
+
+重写`SimpleTaskStep`的`isAutoNotify`方法为false即可手动通知执行结果。
+
+```
+public class StepATask extends SimpleTaskStep {
+
+    @Override
+    public void doTask() throws Exception {
+        // todo
+        // 手动通知任务链任务完成
+        notifyTaskSucceed();
+    }
+
+    @Override
+    protected boolean isAutoNotify() {
+        return false;
+    }
+}
+```
+
 
 ## 参数传递
 
@@ -332,14 +372,14 @@ XTask.getTask(new TaskCommand() {
 
 设置任务的threadType类型，即可完成对任务运行线程的控制。目前支持6种线程处理方式。
 
-类型	| 描述
+类型	| 描述 | 线程池构成
 |---|---
-MAIN | 主线程（UI线程）
-ASYNC | 异步线程（开子线程，普通线程池）
-ASYNC_IO | 异步线程（开子线程，io线程池）
-ASYNC_EMERGENT | 异步线程（开子线程，紧急线程池）
-ASYNC_BACKGROUND | 异步线程（开子线程，优先级较低线程池）
-SYNC | 同步线程（直接执行）
+MAIN | 主线程（UI线程） | /
+ASYNC | 异步线程（开子线程，普通线程池） | 核心线程数和最大线程为CPU数，0s keepTime，LinkedBlockingQueue（128），线程优先级5
+ASYNC_IO | 异步线程（开子线程，io线程池） | 核心线程数和最大线程为(2*CPU数+1)，30s keepTime，LinkedBlockingQueue（128），线程优先级5
+ASYNC_EMERGENT | 异步线程（开子线程，紧急线程池） | 核心线程数为2，最大线程为∞，60s keepTime，SynchronousQueue（不阻塞），线程优先级10
+ASYNC_BACKGROUND | 异步线程（开子线程，优先级较低线程池） | 核心线程数和最大线程为2，0s keepTime，LinkedBlockingQueue（128），线程优先级1
+SYNC | 同步线程（直接执行） | /
 
 ```
 // 1.构造时传入线程
