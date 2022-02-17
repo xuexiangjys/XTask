@@ -194,8 +194,11 @@ engine.addTask(taskStep)
             }
         }));
 ```
-【注意】:如果任务执行成功，就调用`notifyTaskSucceed`，任务执行失败，就调用`notifyTaskFailed`。这里任务无论成功还是失败，只要执行完成都需要调用`notifyTaskXXX`通知任务链该任务完成，否则任务将无法正常执行。
-【注意】:`TaskCommand`和`SimpleTaskStep`默认提供了自动通知执行结果的功能，但是AbstractTaskStep没有提供，需要手动通知。
+
+【注意】对于任务执行完成，需要注意以下两点：
+
+* 如果任务执行成功，就调用`notifyTaskSucceed`，任务执行失败，就调用`notifyTaskFailed`。这里任务无论成功还是失败，只要执行完成都需要调用`notifyTaskXXX`通知任务链该任务完成，否则任务将无法正常执行。
+* `TaskCommand`和`SimpleTaskStep`默认提供了自动通知执行结果的功能，但是AbstractTaskStep没有提供，需要手动通知。
 
 4.设置任务链执行回调.（可选）
 
@@ -270,6 +273,7 @@ public class StepATask extends SimpleTaskStep {
     @Override
     public void doTask() throws Exception {
         // todo
+        // 不需要手动通知任务链任务完成
     }
 }
 
@@ -278,7 +282,7 @@ public class StepBTask extends AbstractTaskStep {
     @Override
     public void doTask() throws Exception {
         // todo
-        // 通知任务链任务完成
+        // 需手动通知任务链任务完成
         notifyTaskSucceed(TaskResult.succeed());
     }
 
@@ -373,7 +377,7 @@ XTask.getTask(new TaskCommand() {
 设置任务的threadType类型，即可完成对任务运行线程的控制。目前支持6种线程处理方式。
 
 类型	| 描述 | 线程池构成
-|---|---
+|---|---|---
 MAIN | 主线程（UI线程） | /
 ASYNC | 异步线程（开子线程，普通线程池） | 核心线程数和最大线程为CPU数，0s keepTime，LinkedBlockingQueue（128），线程优先级5
 ASYNC_IO | 异步线程（开子线程，io线程池） | 核心线程数和最大线程为(2*CPU数+1)，30s keepTime，LinkedBlockingQueue（128），线程优先级5
