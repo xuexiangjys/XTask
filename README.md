@@ -253,7 +253,7 @@ command | 任务执行内容
 threadType | 线程执行类型
 taskParam | 任务参数
 taskHandler | 任务处理者
-
+isAutoNotify | 是否自动通知任务执行结果
 ```
 XTaskStep taskStep = XTask.getTask(new TaskCommand() {
     @Override
@@ -291,7 +291,6 @@ public class StepBTask extends AbstractTaskStep {
         return "StepATask";
     }
 }
-
 ```
 
 ## 任务执行原则
@@ -354,7 +353,6 @@ public class StepATask extends SimpleTaskStep {
     }
 }
 ```
-
 
 ## 参数传递
 
@@ -420,7 +418,6 @@ ICanceller canceller = engine.addTask(group1)
         })
         .start();
 addCanceller(canceller);
-
 ```
 
 ### 并行任务组
@@ -447,7 +444,6 @@ ICanceller canceller = engine.addTask(group1)
         })
         .start();
 addCanceller(canceller);
-
 ```
 
 ---
