@@ -475,7 +475,6 @@ pool.add(engine2.getName());
 // 取消多个任务链的执行
 XTask.cancelTaskChain(pool);
 ```
-```
 
 ### 全部任务链取消
 
