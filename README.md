@@ -111,6 +111,7 @@ getTaskBuilder | 获取简化任务的构建者
 getConcurrentGroupTask | 获取并行任务组
 getSerialGroupTask | 获取串行任务组
 cancelTaskChain | 取消指定任务链执行
+cancelAllTaskChain | 取消所有任务链执行
 postToMain | 执行任务到主线程
 submit | 执行普通异步任务
 emergentSubmit | 执行紧急异步任务
@@ -246,14 +247,14 @@ ICanceller canceller = engine.start();
 
 > 通过XTask.getTask, 传入对应的属性进行构建
 
-属性名	| 描述
-|---|---
-name | 任务步骤名称
-command | 任务执行内容
-threadType | 线程执行类型
-taskParam | 任务参数
-taskHandler | 任务处理者
-isAutoNotify | 是否自动通知任务执行结果
+属性名	| 描述	| 默认值
+|---|---|---
+name | 任务步骤名称 | XTaskStep-N(N为自增数）
+command | 任务执行内容 | /
+threadType | 线程执行类型  | ThreadType.ASYNC
+taskParam | 任务参数 | new TaskParam()
+taskHandler | 任务处理者 | null
+isAutoNotify | 是否自动通知任务执行结果 | true
 ```
 XTaskStep taskStep = XTask.getTask(new TaskCommand() {
     @Override
