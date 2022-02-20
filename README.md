@@ -446,6 +446,45 @@ ICanceller canceller = engine.addTask(group1)
 addCanceller(canceller);
 ```
 
+## 任务链取消
+
+> 通过调用`ICanceller`的`cancel`方法或者`XTask`的`cancelTaskChain`即可完成任务链的取消。
+
+### 单个任务链取消
+
+调用任务链`TaskChainEngine`的`start`方法之后，会返回一个任务取消者`ICanceller`，调用它的`cancel`方法即可完成任务取消。
+
+```
+ICanceller canceller = engine.start();
+// 取消任务链的执行
+canceller.cancel();
+```
+
+### 多个任务链取消
+
+任务链在执行的时候，会默认加入到一个任务取消池，调用`XTask`的`cancelTaskChain`方法，传入多个任务链的名称或者`ICanceller`的名称，即可完成多个任务链的取消。
+
+```
+Set<String> pool = new HashSet<>();
+ICanceller canceller1 = engine1.start();
+ICanceller canceller2 = engine2.start();
+// 使用ICanceller的名称
+pool.add(canceller1.getName());
+// 使用任务链的名称
+pool.add(engine2.getName());
+// 取消多个任务链的执行
+XTask.cancelTaskChain(pool);
+```
+```
+
+### 全部任务链取消
+
+调用`XTask`的`cancelAllTaskChain`方法取消全部任务链的执行
+
+```
+XTask.cancelAllTaskChain();
+```
+
 ---
 
 ## 如果觉得项目还不错，可以考虑打赏一波
