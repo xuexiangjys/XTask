@@ -4,7 +4,13 @@
 [![I](https://img.shields.io/github/issues/xuexiangjys/XTask.svg)](https://github.com/xuexiangjys/XTask/issues)
 [![Star](https://img.shields.io/github/stars/xuexiangjys/XTask.svg)](https://github.com/xuexiangjys/XTask)
 
-一个拓展性极强的任务执行框架。可自由定义和组合任务来实现你想要的功能，尤其适用于处理复杂的业务流程，可灵活添加前置任务或者调整执行顺序。例如：应用的启动初始化流程。
+一个拓展性极强的Android任务执行框架。可自由定义和组合任务来实现你想要的功能，尤其适用于处理复杂的业务流程，可灵活添加前置任务或者调整执行顺序。例如：应用的启动初始化流程。
+
+在使用前，请一定要仔细阅读[使用说明文档](https://github.com/xuexiangjys/XTask/wiki),重要的事情说三遍！！！
+
+在使用前，请一定要仔细阅读[使用说明文档](https://github.com/xuexiangjys/XTask/wiki),重要的事情说三遍！！！
+
+在使用前，请一定要仔细阅读[使用说明文档](https://github.com/xuexiangjys/XTask/wiki),重要的事情说三遍！！！
 
 ## 关于我
 
@@ -33,11 +39,7 @@
 * 支持任务链调用顺序记录和查询。
 * 支持自定义任务执行的线程池。
 
-## 设计思想
-
-框架主体使用责任链的设计模式，辅以建造者模式、工厂模式、适配器模式、组合模式、外观模式以及代理模式来实现。
-
-### 组成结构
+## 组成结构
 
 * 任务链`ITaskChainEngine`：任务链执行引擎，负责统筹调度各任务步骤。
 
