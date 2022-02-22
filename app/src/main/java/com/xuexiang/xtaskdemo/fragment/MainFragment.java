@@ -42,6 +42,7 @@ public class MainFragment extends BaseContainerFragment implements ClickUtils.On
                 //此处填写fragment
                 XTaskStepFragment.class,
                 CustomTaskFragment.class,
+                UseCaseFragment.class,
                 TestThreadPoolFragment.class
         };
     }

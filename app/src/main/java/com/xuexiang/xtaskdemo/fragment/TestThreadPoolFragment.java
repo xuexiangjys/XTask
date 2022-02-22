@@ -90,6 +90,7 @@ public class TestThreadPoolFragment extends BaseSimpleListFragment {
                 break;
             case 2:
                 Log.d(TAG, "cpu count:" + Runtime.getRuntime().availableProcessors());
+                // 任务的最大数量 = maximumPoolSize + BlockingQueue.size, 这里length>30就会报错
                 int length = 30;
                 ExecutorService fixedThreadPool = new ThreadPoolExecutor(5, 20,
                         30L, TimeUnit.SECONDS,
