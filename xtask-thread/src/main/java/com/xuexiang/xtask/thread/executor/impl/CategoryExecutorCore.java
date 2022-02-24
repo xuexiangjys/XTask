@@ -79,6 +79,10 @@ public class CategoryExecutorCore implements ICategoryExecutorCore {
 
     @Override
     public boolean postToMain(Runnable task) {
+        if (ExecutorUtils.isMainThread()) {
+            task.run();
+            return true;
+        }
         return mMainHandler.post(task);
     }
 

@@ -26,7 +26,6 @@ import com.xuexiang.xpage.annotation.Page;
 import com.xuexiang.xtask.XTask;
 import com.xuexiang.xtask.api.step.ConcurrentGroupTaskStep;
 import com.xuexiang.xtask.core.ITaskChainEngine;
-import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.step.impl.TaskChainCallbackAdapter;
 import com.xuexiang.xtask.core.step.impl.TaskCommand;
@@ -64,7 +63,7 @@ public class AppStartFragment extends BaseFragment {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.fragment_app_start;
+        return R.layout.fragment_usecase_template;
     }
 
     @Override
@@ -136,7 +135,6 @@ public class AppStartFragment extends BaseFragment {
             logger.logSuccess(logContent);
         }
     }
-
 
     public void clearLog() {
         if (logger != null) {

@@ -17,6 +17,8 @@
 
 package com.xuexiang.xtask.thread.utils;
 
+import android.os.Looper;
+
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
@@ -55,6 +57,15 @@ public final class ExecutorUtils {
         for (ExecutorService executor : executors) {
             shutdown(executor);
         }
+    }
+
+    /**
+     * 是否是主线程
+     *
+     * @return 是否是主线程
+     */
+    public static boolean isMainThread() {
+        return Looper.getMainLooper() == Looper.myLooper();
     }
 
 }

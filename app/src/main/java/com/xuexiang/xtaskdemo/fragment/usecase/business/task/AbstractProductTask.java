@@ -15,25 +15,34 @@
  *
  */
 
-package com.xuexiang.xtaskdemo.fragment;
+package com.xuexiang.xtaskdemo.fragment.usecase.business.task;
 
-import com.xuexiang.xpage.annotation.Page;
-import com.xuexiang.xtaskdemo.core.BaseContainerFragment;
-import com.xuexiang.xtaskdemo.fragment.usecase.AppStartFragment;
-import com.xuexiang.xtaskdemo.fragment.usecase.ComplexBusinessFragment;
+import com.xuexiang.xtask.api.step.SimpleTaskStep;
+import com.xuexiang.xui.widget.textview.LoggerTextView;
 
 /**
+ * 基础抽象任务
+ *
  * @author xuexiang
- * @since 2/23/22 12:21 AM
+ * @since 2/25/22 2:18 AM
  */
-@Page(name = "应用场景\n列举常用的使用案例")
-public class UseCaseFragment extends BaseContainerFragment {
+public abstract class AbstractProductTask extends SimpleTaskStep {
+
+    protected LoggerTextView mLogger;
+
+    public AbstractProductTask(LoggerTextView logger) {
+        mLogger = logger;
+    }
+
+    public void log(String logContent) {
+        if (mLogger != null) {
+            mLogger.logSuccess(logContent);
+        }
+    }
 
     @Override
-    protected Class[] getPagesClasses() {
-        return new Class[]{
-                AppStartFragment.class,
-                ComplexBusinessFragment.class
-        };
+    protected boolean isAutoNotify() {
+        // 这里进行手动控制
+        return false;
     }
 }

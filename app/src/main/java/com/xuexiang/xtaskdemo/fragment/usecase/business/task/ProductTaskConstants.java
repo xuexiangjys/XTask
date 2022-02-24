@@ -15,25 +15,19 @@
  *
  */
 
-package com.xuexiang.xtaskdemo.fragment;
-
-import com.xuexiang.xpage.annotation.Page;
-import com.xuexiang.xtaskdemo.core.BaseContainerFragment;
-import com.xuexiang.xtaskdemo.fragment.usecase.AppStartFragment;
-import com.xuexiang.xtaskdemo.fragment.usecase.ComplexBusinessFragment;
+package com.xuexiang.xtaskdemo.fragment.usecase.business.task;
 
 /**
  * @author xuexiang
- * @since 2/23/22 12:21 AM
+ * @since 2/25/22 2:14 AM
  */
-@Page(name = "应用场景\n列举常用的使用案例")
-public class UseCaseFragment extends BaseContainerFragment {
+public final class ProductTaskConstants {
 
-    @Override
-    protected Class[] getPagesClasses() {
-        return new Class[]{
-                AppStartFragment.class,
-                ComplexBusinessFragment.class
-        };
-    }
+    public static final String KEY_PRODUCT_ID = "key_product_id";
+
+    public static final String KEY_PRODUCT_INFO = "key_product_info";
+
+    public static final String KEY_PRODUCT = "key_product";
+
+
 }
