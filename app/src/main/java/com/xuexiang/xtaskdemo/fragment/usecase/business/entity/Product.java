@@ -77,6 +77,6 @@ public class Product {
 
     @Override
     public String toString() {
-        return "产品信息:" + info + ", 产地:'" + address + ", 价格:'" + price + ", 上市日前:'" + publicTime;
+        return "产品信息:" + info + ", 产地:" + address + ", 价格:" + price + ", 上市日前:" + publicTime;
     }
 }
