@@ -17,6 +17,7 @@
 
 package com.xuexiang.xtaskdemo.fragment.usecase;
 
+import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -32,9 +33,9 @@ import com.xuexiang.xtaskdemo.R;
 import com.xuexiang.xtaskdemo.core.BaseFragment;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.entity.Product;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.entity.ProductFactory;
+import com.xuexiang.xtaskdemo.fragment.usecase.business.entity.ProductInfo;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.AbstractProcessor;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.GetProductInfoProcessor;
-import com.xuexiang.xtaskdemo.fragment.usecase.business.entity.ProductInfo;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.GivePriceProcessor;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.PublicProductProcessor;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.SearchFactoryProcessor;
@@ -48,10 +49,15 @@ import com.xuexiang.xutil.system.AppExecutors;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
- * @author xuexiang
- * @since 2/24/22 1:03 AM
+ * 复杂业务流程处理
+ * 流程如下：
+ * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
  */
 @Page(name = "复杂业务流程处理")
 public class ComplexBusinessFragment extends BaseFragment {
@@ -61,10 +67,11 @@ public class ComplexBusinessFragment extends BaseFragment {
 
     private String productId = "123456";
 
+    Disposable disposable;
 
     @Override
     protected int getLayoutId() {
-        return R.layout.fragment_usecase_template;
+        return R.layout.fragment_complex_business;
     }
 
     @Override
@@ -73,14 +80,19 @@ public class ComplexBusinessFragment extends BaseFragment {
     }
 
     @SingleClick
-    @OnClick({R.id.btn_before_improve, R.id.btn_after_improve})
+    @OnClick({R.id.btn_normal, R.id.btn_rxjava, R.id.btn_xtask})
     public void onViewClicked(View view) {
+        clearLog();
+        log("开始仿冒生产网红产品...");
         switch (view.getId()) {
-            case R.id.btn_before_improve:
-                doBusinessBeforeImprove();
+            case R.id.btn_normal:
+                doBusinessNormal();
                 break;
-            case R.id.btn_after_improve:
-                doBusinessAfterImprove();
+            case R.id.btn_rxjava:
+                doBusinessRxJava();
+                break;
+            case R.id.btn_xtask:
+                doBusinessXTask();
                 break;
             default:
                 break;
@@ -88,13 +100,11 @@ public class ComplexBusinessFragment extends BaseFragment {
     }
 
     /**
-     * 优化前的写法, 这里仅是演示模拟，实际的可能更复杂
+     * 普通的接口回调写法, 这里仅是演示模拟，实际的可能更复杂
      * 流程如下：
      * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
      */
-    private void doBusinessBeforeImprove() {
-        clearLog();
-        log("开始仿冒生产网红产品...");
+    private void doBusinessNormal() {
         AppExecutors.get().singleIO().execute(() -> {
             // 1.获取产品信息
             new GetProductInfoProcessor(logger, productId).setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<ProductInfo>() {
@@ -128,17 +138,48 @@ public class ComplexBusinessFragment extends BaseFragment {
         });
     }
 
+
     /**
-     * 优化后的写法, 这里仅是演示模拟，实际的可能更复杂
+     * RxJava写法, 这里仅是演示模拟，实际的可能更复杂
+     * 流程如下：
+     * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
      */
-    private void doBusinessAfterImprove() {
-        clearLog();
-        log("开始仿冒生产网红产品...");
+    private void doBusinessRxJava() {
+        disposable = Observable.just(productId)
+                // 1.获取产品信息
+                .map(id -> new GetProductInfoProcessor(logger, id).process())
+                // 2.查询可生产的工厂
+                .map(productInfo -> new Pair<>(new SearchFactoryProcessor(logger, productInfo).process(), productInfo))
+                .map(productPair -> {
+                    // 3.联系工厂生产产品
+                    log("开始生产产品...");
+                    Product product = productPair.first.produce(productPair.second);
+                    // 4.送去市场部门评估售价
+                    return new GivePriceProcessor(logger, product).process();
+                })
+                // 5.产品上市
+                .map(product -> new PublicProductProcessor(logger, product).process())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(product -> log("仿冒生产网红产品完成, " + product));
+    }
+
+
+    /**
+     * XTask写法, 这里仅是演示模拟，实际的可能更复杂
+     * 流程如下：
+     * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
+     */
+    private void doBusinessXTask() {
         XTask.getTaskChain()
                 .setTaskParam(TaskParam.get(ProductTaskConstants.KEY_PRODUCT_ID, productId))
+                // 1.获取产品信息
                 .addTask(new GetProductInfoTask(logger))
+                // 2.查询可生产的工厂, 3.联系工厂生产产品
                 .addTask(new SearchFactoryTask(logger))
+                // 4.送去市场部门评估售价
                 .addTask(new GivePriceTask(logger))
+                // 5.产品上市
                 .addTask(new PublicProductTask(logger))
                 .setTaskChainCallback(new TaskChainCallbackAdapter() {
                     @Override
@@ -165,6 +206,9 @@ public class ComplexBusinessFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
         XTask.cancelAllTaskChain();
     }
 }
