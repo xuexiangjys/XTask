@@ -31,11 +31,13 @@ import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.thread.XTaskExecutor;
 import com.xuexiang.xtask.thread.executor.ICategoryExecutorCore;
 import com.xuexiang.xtask.thread.executor.IPriorityExecutorCore;
-import com.xuexiang.xtask.thread.pool.ICancelable;
-import com.xuexiang.xtask.thread.pool.ICancellerPool;
+import com.xuexiang.xtask.thread.executor.IScheduledExecutorCore;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancellerPool;
 import com.xuexiang.xtask.utils.CancellerPoolUtils;
 
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * XTask对外统一API入口
@@ -77,10 +79,10 @@ public final class XTask {
     /**
      * 设置是否打印任务执行所在的线程名
      *
-     * @param isLogTaskRunThreadName 是否打印任务执行所在的线程名
+     * @param isLogThreadName 是否打印任务执行所在的线程名
      */
-    public static void setIsLogTaskRunThreadName(boolean isLogTaskRunThreadName) {
-        TaskLogger.setIsLogTaskRunThreadName(isLogTaskRunThreadName);
+    public static void setIsLogThreadName(boolean isLogThreadName) {
+        TaskLogger.setIsLogThreadName(isLogThreadName);
     }
 
     //========================TaskChainEngine===============================//
@@ -276,7 +278,7 @@ public final class XTask {
      *
      * @param priorityExecutorCore 优先级控制的执行内核实现接口
      */
-    public static void setPriorityExecutorCore(IPriorityExecutorCore priorityExecutorCore) {
+    public static void setPriorityExecutorCore(@NonNull IPriorityExecutorCore priorityExecutorCore) {
         XTaskExecutor.get().setPriorityExecutorCore(priorityExecutorCore);
     }
 
@@ -285,9 +287,27 @@ public final class XTask {
      *
      * @param categoryExecutorCore 类别执行内核实现接口
      */
-    public static void setCategoryExecutorCore(ICategoryExecutorCore categoryExecutorCore) {
+    public static void setCategoryExecutorCore(@NonNull ICategoryExecutorCore categoryExecutorCore) {
         XTaskExecutor.get().setCategoryExecutorCore(categoryExecutorCore);
     }
+
+    /**
+     * 设置周期执行内核的实现接口
+     *
+     * @param scheduledExecutorCore 周期执行内核的实现接口
+     */
+    public static void setScheduledExecutorCore(@NonNull IScheduledExecutorCore scheduledExecutorCore) {
+        XTaskExecutor.get().setScheduledExecutorCore(scheduledExecutorCore);
+    }
+
+    /**
+     * 停止工作
+     */
+    public static void shutdown() {
+        XTaskExecutor.get().shutdown();
+    }
+
+    //================PriorityExecutorCore==================//
 
     /**
      * 按优先级执行异步任务
@@ -312,6 +332,8 @@ public final class XTask {
         return XTaskExecutor.get().submit(groupName, task, priority);
     }
 
+    //================CategoryExecutorCore==================//
+
     /**
      * 执行任务到主线程
      *
@@ -323,10 +345,14 @@ public final class XTask {
     }
 
     /**
-     * 停止工作
+     * 延迟执行任务到主线程
+     *
+     * @param task        任务
+     * @param delayMillis 延迟时间
+     * @return 是否执行成功
      */
-    public static void shutdown() {
-        XTaskExecutor.get().shutdown();
+    public static ICancelable postToMainDelay(Runnable task, long delayMillis) {
+        return XTaskExecutor.get().postToMainDelay(task, delayMillis);
     }
 
     /**
@@ -378,6 +404,46 @@ public final class XTask {
      */
     public static ICancelable groupSubmit(String groupName, Runnable task) {
         return XTaskExecutor.get().groupSubmit(groupName, task);
+    }
+
+    //================ScheduledExecutorCore==================//
+
+    /**
+     * 执行延期任务
+     *
+     * @param task  任务
+     * @param delay 延迟时长
+     * @param unit  时间单位
+     * @return 取消接口
+     */
+    public static ICancelable schedule(Runnable task, long delay, TimeUnit unit) {
+        return XTaskExecutor.get().schedule(task, delay, unit);
+    }
+
+    /**
+     * 执行周期任务（以固定频率执行的任务）
+     *
+     * @param task         任务
+     * @param initialDelay 初始延迟时长
+     * @param period       间隔时长
+     * @param unit         时间单位
+     * @return 取消接口
+     */
+    public static ICancelable scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit unit) {
+        return XTaskExecutor.get().scheduleAtFixedRate(task, initialDelay, period, unit);
+    }
+
+    /**
+     * 执行周期任务（以固定延时执行的任务，延时是相对当前任务结束为起点计算开始时间）
+     *
+     * @param task         任务
+     * @param initialDelay 初始延迟时长
+     * @param period       间隔时长
+     * @param unit         时间单位
+     * @return 取消接口
+     */
+    public static ICancelable scheduleWithFixedDelay(Runnable task, long initialDelay, long period, TimeUnit unit) {
+        return XTaskExecutor.get().scheduleWithFixedDelay(task, initialDelay, period, unit);
     }
 
 }

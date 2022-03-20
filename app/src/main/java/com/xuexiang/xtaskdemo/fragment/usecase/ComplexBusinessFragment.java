@@ -58,6 +58,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
  * 复杂业务流程处理
  * 流程如下：
  * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
+ *
+ * @author xuexiang
+ * @since 3/18/22 11:28 PM
  */
 @Page(name = "复杂业务流程处理")
 public class ComplexBusinessFragment extends BaseFragment {
@@ -67,7 +70,7 @@ public class ComplexBusinessFragment extends BaseFragment {
 
     private String productId = "123456";
 
-    Disposable disposable;
+    private Disposable disposable;
 
     @Override
     protected int getLayoutId() {

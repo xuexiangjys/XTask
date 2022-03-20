@@ -15,7 +15,9 @@
  *
  */
 
-package com.xuexiang.xtask.thread.pool;
+package com.xuexiang.xtask.thread.pool.cancel;
+
+import com.xuexiang.xtask.thread.utils.CancelUtils;
 
 import java.util.Collection;
 import java.util.Map;
@@ -53,11 +55,9 @@ public final class TaskCancellerPool implements ICancellerPool {
             return false;
         }
         ICancelable cancelable = mPool.get(name);
-        if (cancelable == null || cancelable.isCancelled()) {
-            return false;
-        }
-        cancelable.cancel();
-        return true;
+        boolean result = CancelUtils.cancel(cancelable);
+        mPool.remove(name);
+        return result;
     }
 
     @Override
@@ -79,19 +79,17 @@ public final class TaskCancellerPool implements ICancellerPool {
         if (mPool.isEmpty()) {
             return;
         }
-        for (ICancelable cancelable : mPool.values()) {
-            if (cancelable != null && !cancelable.isCancelled()) {
-                cancelable.cancel();
-            }
-        }
+        CancelUtils.cancel(mPool.values());
+        mPool.clear();
     }
 
     @Override
     public void clear(boolean ifNeedCancel) {
         if (ifNeedCancel) {
             cancelAll();
+        } else {
+            mPool.clear();
         }
-        mPool.clear();
     }
 
 }

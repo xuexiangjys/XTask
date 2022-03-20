@@ -35,7 +35,7 @@ import com.xuexiang.xtask.core.param.impl.TaskParam;
 import com.xuexiang.xtask.core.param.impl.TaskResult;
 import com.xuexiang.xtask.core.step.impl.TaskChainCallbackAdapter;
 import com.xuexiang.xtask.core.step.impl.TaskCommand;
-import com.xuexiang.xtask.thread.pool.ICanceller;
+import com.xuexiang.xtask.thread.pool.cancel.ICanceller;
 import com.xuexiang.xtaskdemo.core.BaseSimpleListFragment;
 import com.xuexiang.xutil.common.ObjectUtils;
 

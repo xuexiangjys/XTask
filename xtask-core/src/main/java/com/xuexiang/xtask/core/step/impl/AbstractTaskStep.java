@@ -28,7 +28,7 @@ import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.core.step.ITaskStepHandler;
 import com.xuexiang.xtask.core.step.ITaskStepLifecycle;
 import com.xuexiang.xtask.logger.TaskLogger;
-import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -304,7 +304,7 @@ public abstract class AbstractTaskStep implements ITaskStep {
     }
 
     private String getTaskRunningDetailLogInfo() {
-        if (TaskLogger.isLogTaskRunThreadName()) {
+        if (TaskLogger.isLogThreadName()) {
             return getTaskLogName() + " has run, thread: " + Thread.currentThread().getName() + ", path:" + getTaskParam().getPath();
         } else {
             return getTaskLogName() + " has run, path: " + getTaskParam().getPath();

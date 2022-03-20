@@ -25,8 +25,9 @@ import androidx.annotation.NonNull;
 
 import com.xuexiang.xtask.thread.executor.ICategoryExecutorCore;
 import com.xuexiang.xtask.thread.pool.DefaultThreadPoolExecutor;
-import com.xuexiang.xtask.thread.pool.ICancelable;
 import com.xuexiang.xtask.thread.pool.TaskThreadFactory;
+import com.xuexiang.xtask.thread.pool.cancel.CancelHandlerRunnable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 import com.xuexiang.xtask.thread.utils.ExecutorUtils;
 
 import java.util.Map;
@@ -84,6 +85,11 @@ public class CategoryExecutorCore implements ICategoryExecutorCore {
             return true;
         }
         return mMainHandler.post(task);
+    }
+
+    @Override
+    public ICancelable postToMainDelay(Runnable task, long delayMillis) {
+        return CancelHandlerRunnable.get(mMainHandler, task).startDelayed(delayMillis);
     }
 
     @Override

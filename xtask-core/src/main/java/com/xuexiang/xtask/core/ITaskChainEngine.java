@@ -22,8 +22,8 @@ import androidx.annotation.NonNull;
 import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.step.IGroupTaskStep;
 import com.xuexiang.xtask.core.step.ITaskStepLifecycle;
-import com.xuexiang.xtask.thread.pool.ICancelable;
-import com.xuexiang.xtask.thread.pool.ICanceller;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICanceller;
 
 /**
  * 任务链执行引擎实现接口

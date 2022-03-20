@@ -17,7 +17,7 @@
 
 package com.xuexiang.xtask.thread.executor;
 
-import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 
 /**
  * 拥有优先级控制的执行者内核实现接口

@@ -84,7 +84,7 @@ allprojects {
 dependencies {
   ...
   // XTask
-  implementation 'com.github.xuexiangjys:XTask:xtask-core:1.0.0'
+  implementation 'com.github.xuexiangjys:XTask:xtask-core:1.0.1'
 }
 ```
 
@@ -106,7 +106,7 @@ XTask.debug(true);
 |---|---
 debug | 设置是否打开调试
 setLogger | 自定义日志打印
-setIsLogTaskRunThreadName | 设置是否打印任务执行所在的线程名，默认false
+setIsLogThreadName | 设置是否打印任务执行所在的线程名，默认false
 getTaskChain | 获取任务链执行引擎
 getTask | 获取简化的任务
 getTaskBuilder | 获取简化任务的构建者

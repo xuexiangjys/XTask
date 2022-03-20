@@ -23,7 +23,7 @@ import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.thread.XTaskExecutor;
-import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 
 import java.util.List;
 

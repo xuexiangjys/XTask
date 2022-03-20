@@ -67,7 +67,7 @@ public final class TaskLogger {
     /**
      * 是否打印任务执行所在的线程名
      */
-    private static boolean sIsLogTaskRunThreadName = false;
+    private static boolean sIsLogThreadName = false;
 
     //==============属性设置================//
 
@@ -130,10 +130,10 @@ public final class TaskLogger {
     /**
      * 设置是否打印任务执行所在的线程名
      *
-     * @param isLogTaskRunThreadName 是否打印任务执行所在的线程名
+     * @param isLogThreadName 是否打印任务执行所在的线程名
      */
-    public static void setIsLogTaskRunThreadName(boolean isLogTaskRunThreadName) {
-        TaskLogger.sIsLogTaskRunThreadName = isLogTaskRunThreadName;
+    public static void setIsLogThreadName(boolean isLogThreadName) {
+        TaskLogger.sIsLogThreadName = isLogThreadName;
     }
 
     /**
@@ -141,8 +141,8 @@ public final class TaskLogger {
      *
      * @return 是否打印任务执行所在的线程名
      */
-    public static boolean isLogTaskRunThreadName() {
-        return sIsLogTaskRunThreadName;
+    public static boolean isLogThreadName() {
+        return sIsLogThreadName;
     }
 
     //===================对外接口=======================//

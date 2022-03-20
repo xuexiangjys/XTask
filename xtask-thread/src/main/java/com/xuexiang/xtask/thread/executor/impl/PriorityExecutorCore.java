@@ -23,7 +23,7 @@ import androidx.annotation.NonNull;
 
 import com.xuexiang.xtask.thread.executor.IExecutorCore;
 import com.xuexiang.xtask.thread.executor.IPriorityExecutorCore;
-import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 import com.xuexiang.xtask.thread.pool.PriorityThreadPoolExecutor;
 import com.xuexiang.xtask.thread.pool.TaskThreadFactory;
 import com.xuexiang.xtask.thread.utils.ExecutorUtils;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 使用PriorityThreadPoolExecutor实现的线程执行内核，通过阻塞队列(PriorityBlockingQueue)来实现优先级的控制。
+ * 拥有优先级控制，使用PriorityThreadPoolExecutor实现的线程执行内核，通过阻塞队列(PriorityBlockingQueue)来实现优先级的控制。
  *
  * @author xuexiang
  * @since 2021/11/10 1:17 AM

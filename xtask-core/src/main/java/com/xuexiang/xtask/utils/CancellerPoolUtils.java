@@ -17,9 +17,9 @@
 
 package com.xuexiang.xtask.utils;
 
-import com.xuexiang.xtask.thread.pool.ICancelable;
-import com.xuexiang.xtask.thread.pool.ICancellerPool;
-import com.xuexiang.xtask.thread.pool.TaskCancellerPool;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancellerPool;
+import com.xuexiang.xtask.thread.pool.cancel.TaskCancellerPool;
 
 import java.util.Collection;
 

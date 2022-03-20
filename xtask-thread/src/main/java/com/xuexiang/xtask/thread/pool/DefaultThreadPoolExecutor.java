@@ -19,6 +19,9 @@ package com.xuexiang.xtask.thread.pool;
 
 import androidx.annotation.NonNull;
 
+import com.xuexiang.xtask.thread.pool.base.BaseThreadPoolExecutor;
+import com.xuexiang.xtask.thread.pool.cancel.IFuture;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;

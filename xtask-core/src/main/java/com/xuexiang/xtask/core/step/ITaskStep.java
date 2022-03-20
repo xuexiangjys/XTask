@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
-import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 
 /**
  * 任务步骤

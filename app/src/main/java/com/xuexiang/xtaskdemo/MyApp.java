@@ -47,7 +47,7 @@ public class MyApp extends Application {
         // 设置XTask的调试模式
         XTask.debug(isDebug());
 //        // 设置是否打印任务执行所在的线程名
-//        XTask.setIsLogTaskRunThreadName(true);
+//        XTask.setIsLogThreadName(true);
     }
 
     /**

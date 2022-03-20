@@ -17,7 +17,7 @@
 
 package com.xuexiang.xtask.thread.executor;
 
-import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 
 /**
  * 拥有不同类别的执行者内核实现接口
@@ -34,6 +34,15 @@ public interface ICategoryExecutorCore extends IExecutorCore {
      * @return 是否执行成功
      */
     boolean postToMain(Runnable task);
+
+    /**
+     * 延迟执行任务到主线程
+     *
+     * @param task        任务
+     * @param delayMillis 延迟时间
+     * @return 取消接口
+     */
+    ICancelable postToMainDelay(Runnable task, long delayMillis);
 
     /**
      * 执行紧急异步任务【线程的优先级默认是10】

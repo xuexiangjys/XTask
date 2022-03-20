@@ -15,25 +15,20 @@
  *
  */
 
-package com.xuexiang.xtask.thread.pool;
+package com.xuexiang.xtask.thread.pool.cancel;
 
 /**
- * 可取消执行的实现接口
+ * 取消者
  *
  * @author xuexiang
- * @since 2021/11/2 12:20 AM
+ * @since 2/7/22 12:39 PM
  */
-public interface ICancelable {
+public interface ICanceller extends ICancelable {
 
     /**
-     * 取消
-     */
-    void cancel();
-
-    /**
-     * 获取是否已取消
+     * 获取取消的标识
      *
-     * @return 是否已取消
+     * @return 取消的标识
      */
-    boolean isCancelled();
+    String getName();
 }

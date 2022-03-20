@@ -15,7 +15,7 @@
  *
  */
 
-package com.xuexiang.xtask.thread.pool;
+package com.xuexiang.xtask.thread.pool.cancel;
 
 import java.util.Collection;
 

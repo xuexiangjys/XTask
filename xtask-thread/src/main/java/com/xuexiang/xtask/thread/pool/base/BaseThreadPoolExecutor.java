@@ -15,7 +15,7 @@
  *
  */
 
-package com.xuexiang.xtask.thread.pool;
+package com.xuexiang.xtask.thread.pool.base;
 
 import com.xuexiang.xtask.logger.TaskLogger;
 import com.xuexiang.xtask.thread.priority.IPriority;
@@ -31,7 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 线程池基类
+ * ThreadPoolExecutor线程池基类
  * <p>
  * 线程池的执行顺序：
  * <p>
@@ -113,8 +113,16 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
     @Override
     protected void beforeExecute(Thread t, Runnable r) {
         super.beforeExecute(t, r);
-        if (t != null && r instanceof IPriority) {
+        if (t == null) {
+           return;
+        }
+        if (!TaskLogger.isLogThreadName()) {
+            return;
+        }
+        if (r instanceof IPriority) {
             TaskLogger.dTag(TAG, "Running task start execute, id:" + ((IPriority) r).getId() + ", priority:" + ((IPriority) r).priority() + ", in Thread [" + Thread.currentThread().getName() + "]");
+        } else {
+            TaskLogger.dTag(TAG, "Running task start execute, in Thread [" + Thread.currentThread().getName() + "]");
         }
     }
 

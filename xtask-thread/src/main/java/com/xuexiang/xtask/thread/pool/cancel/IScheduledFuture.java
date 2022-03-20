@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 xuexiangjys(xuexiangjys@163.com)
+ * Copyright (C) 2022 xuexiangjys(xuexiangjys@163.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  *
  */
 
-package com.xuexiang.xtask.thread.priority;
+package com.xuexiang.xtask.thread.pool.cancel;
 
-import com.xuexiang.xtask.thread.pool.cancel.IFuture;
+import java.util.concurrent.RunnableScheduledFuture;
 
 /**
- * 具有优先级排序的Future接口
+ * 可直接取消任务的RunnableScheduledFuture接口
  *
  * @author xuexiang
- * @since 2021/10/9 2:31 AM
+ * @since 3/20/22 1:30 AM
  */
-public interface IPriorityFuture<V> extends IPriorityComparable<IPriority>, IFuture<V> {
+public interface IScheduledFuture<T> extends RunnableScheduledFuture<T>, ICancelable {
 
 }

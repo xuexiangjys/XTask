@@ -23,7 +23,7 @@ import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.step.ITaskStep;
 import com.xuexiang.xtask.core.step.impl.AbstractGroupTaskStep;
-import com.xuexiang.xtask.thread.pool.ICancelable;
+import com.xuexiang.xtask.thread.pool.cancel.ICancelable;
 import com.xuexiang.xtask.utils.TaskUtils;
 
 /**
