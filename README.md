@@ -115,11 +115,15 @@ getSerialGroupTask | 获取串行任务组
 cancelTaskChain | 取消指定任务链执行
 cancelAllTaskChain | 取消所有任务链执行
 postToMain | 执行任务到主线程
+postToMainDelay | 延迟执行任务到主线程
 submit | 执行普通异步任务
 emergentSubmit | 执行紧急异步任务
 backgroundSubmit | 执行后台异步任务
 ioSubmit | 执行io耗时的异步任务
 groupSubmit | 执行分组异步任务
+schedule | 执行延期任务
+scheduleAtFixedRate | 执行周期任务（固定间期）
+scheduleWithFixedDelay | 执行周期任务（固定延期）
 
 ### 如何执行一条任务链
 
