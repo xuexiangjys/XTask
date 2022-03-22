@@ -15,34 +15,38 @@
  *
  */
 
-package com.xuexiang.xtaskdemo.fragment.usecase.business.task;
+package com.xuexiang.xtaskdemo.fragment.usecase.concurrent.task;
 
 import com.xuexiang.xtask.core.param.ITaskResult;
-import com.xuexiang.xtaskdemo.fragment.usecase.business.entity.ProductInfo;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.AbstractProcessor;
-import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.GetProductInfoProcessor;
+import com.xuexiang.xtaskdemo.fragment.usecase.business.task.AbstractTask;
+import com.xuexiang.xtaskdemo.fragment.usecase.business.task.ProductTaskConstants;
+import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.BriefInfo;
+import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.Product;
+import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.processor.GetBriefInfoProcessor;
 import com.xuexiang.xui.widget.textview.LoggerTextView;
 
 /**
- * 1.获取产品信息
+ * 获取商品简要信息
  *
  * @author xuexiang
- * @since 2/25/22 2:07 AM
+ * @since 3/22/22 11:52 PM
  */
-public class GetProductInfoTask extends AbstractTask {
+public class GetBriefInfoTask extends AbstractTask {
 
-    public GetProductInfoTask(LoggerTextView logger) {
+    public GetBriefInfoTask(LoggerTextView logger) {
         super(logger);
     }
 
     @Override
     public void doTask() throws Exception {
         String productId = getTaskParam().getString(ProductTaskConstants.KEY_PRODUCT_ID);
-        new GetProductInfoProcessor(mLogger, productId)
-                .setProcessorCallback(new AbstractProcessor.IProcessorCallback<ProductInfo>() {
+        new GetBriefInfoProcessor(mLogger, productId)
+                .setProcessorCallback(new AbstractProcessor.IProcessorCallback<BriefInfo>() {
                     @Override
-                    public void onSuccess(ProductInfo info) {
-                        getTaskParam().put(ProductTaskConstants.KEY_PRODUCT_INFO, info);
+                    public void onSuccess(BriefInfo briefInfo) {
+                        Product product = new Product(briefInfo);
+                        getTaskParam().put(ProductTaskConstants.KEY_PRODUCT, product);
                         notifyTaskSucceed();
                     }
 
@@ -56,8 +60,6 @@ public class GetProductInfoTask extends AbstractTask {
 
     @Override
     public String getName() {
-        return "1.获取产品信息";
+        return "1.获取商品简要信息";
     }
-
-
 }

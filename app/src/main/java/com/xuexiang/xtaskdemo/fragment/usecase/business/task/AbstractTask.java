@@ -26,11 +26,11 @@ import com.xuexiang.xui.widget.textview.LoggerTextView;
  * @author xuexiang
  * @since 2/25/22 2:18 AM
  */
-public abstract class AbstractProductTask extends SimpleTaskStep {
+public abstract class AbstractTask extends SimpleTaskStep {
 
     protected LoggerTextView mLogger;
 
-    public AbstractProductTask(LoggerTextView logger) {
+    public AbstractTask(LoggerTextView logger) {
         mLogger = logger;
     }
 

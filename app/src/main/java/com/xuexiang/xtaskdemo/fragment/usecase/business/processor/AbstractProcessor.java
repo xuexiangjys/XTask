@@ -43,6 +43,8 @@ public abstract class AbstractProcessor<T> {
 
     /**
      * 处理任务
+     *
+     * @return 返回的结果
      */
     public abstract T process();
 

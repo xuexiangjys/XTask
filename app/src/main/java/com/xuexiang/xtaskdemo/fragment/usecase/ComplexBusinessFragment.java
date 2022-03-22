@@ -56,7 +56,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * 复杂业务流程处理
- * 流程如下：
+ *
+ * 案例[高仿网红产品]的流程如下：
  * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
  *
  * @author xuexiang
@@ -74,7 +75,7 @@ public class ComplexBusinessFragment extends BaseFragment {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.fragment_complex_business;
+        return R.layout.fragment_usecase_compare;
     }
 
     @Override

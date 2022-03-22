@@ -31,7 +31,7 @@ import com.xuexiang.xui.widget.textview.LoggerTextView;
  * @author xuexiang
  * @since 2/25/22 2:17 AM
  */
-public class SearchFactoryTask extends AbstractProductTask {
+public class SearchFactoryTask extends AbstractTask {
 
     public SearchFactoryTask(LoggerTextView logger) {
         super(logger);

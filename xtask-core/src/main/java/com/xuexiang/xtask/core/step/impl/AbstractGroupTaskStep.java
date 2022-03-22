@@ -100,7 +100,7 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
     }
 
     @Override
-    public IGroupTaskStep addTask(ITaskStep taskStep) {
+    public AbstractGroupTaskStep addTask(ITaskStep taskStep) {
         if (taskStep != null) {
             taskStep.setTaskStepLifecycle(this);
             mTasks.add(taskStep);
@@ -109,7 +109,7 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
     }
 
     @Override
-    public IGroupTaskStep addTasks(List<ITaskStep> taskStepList) {
+    public AbstractGroupTaskStep addTasks(List<ITaskStep> taskStepList) {
         if (!CommonUtils.isEmpty(taskStepList)) {
             for (ITaskStep taskStep : taskStepList) {
                 addTask(taskStep);

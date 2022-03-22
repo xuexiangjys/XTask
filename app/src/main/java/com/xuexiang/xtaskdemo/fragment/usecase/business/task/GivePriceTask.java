@@ -29,7 +29,7 @@ import com.xuexiang.xui.widget.textview.LoggerTextView;
  * @author xuexiang
  * @since 2/25/22 2:27 AM
  */
-public class GivePriceTask extends AbstractProductTask {
+public class GivePriceTask extends AbstractTask {
 
     public GivePriceTask(LoggerTextView logger) {
         super(logger);

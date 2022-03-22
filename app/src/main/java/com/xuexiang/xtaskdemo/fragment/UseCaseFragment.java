@@ -21,6 +21,7 @@ import com.xuexiang.xpage.annotation.Page;
 import com.xuexiang.xtaskdemo.core.BaseContainerFragment;
 import com.xuexiang.xtaskdemo.fragment.usecase.AppStartFragment;
 import com.xuexiang.xtaskdemo.fragment.usecase.ComplexBusinessFragment;
+import com.xuexiang.xtaskdemo.fragment.usecase.ConcurrentProcessFragment;
 
 /**
  * @author xuexiang
@@ -33,7 +34,8 @@ public class UseCaseFragment extends BaseContainerFragment {
     protected Class[] getPagesClasses() {
         return new Class[]{
                 AppStartFragment.class,
-                ComplexBusinessFragment.class
+                ComplexBusinessFragment.class,
+                ConcurrentProcessFragment.class
         };
     }
 }
