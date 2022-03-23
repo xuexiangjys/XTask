@@ -19,6 +19,7 @@ package com.xuexiang.xtask.core.step.impl;
 
 import androidx.annotation.NonNull;
 
+import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
 import com.xuexiang.xtask.core.param.impl.TaskResult;
@@ -51,16 +52,16 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
     /**
      * 任务组名称
      */
-    private String mName;
+    private final String mName;
     /**
      * 任务结果
      */
-    private TaskResult mResult = new TaskResult();
+    private final TaskResult mResult = new TaskResult();
 
     /**
      * 执行任务集合
      */
-    private List<ITaskStep> mTasks = new CopyOnWriteArrayList<>();
+    private final List<ITaskStep> mTasks = new CopyOnWriteArrayList<>();
 
     /**
      * 任务执行索引
@@ -76,7 +77,7 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
      * 构造方法
      */
     public AbstractGroupTaskStep() {
-        mName = "GroupTaskStep-" + GROUP_TASK_NUMBER.getAndIncrement();
+        mName = generationGroupName();
     }
 
     /**
@@ -84,8 +85,18 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
      *
      * @param name 任务组名称
      */
-    public AbstractGroupTaskStep(String name) {
+    public AbstractGroupTaskStep(@NonNull String name) {
         mName = name;
+    }
+
+    /**
+     * 构造方法
+     *
+     * @param threadType 线程类型
+     */
+    public AbstractGroupTaskStep(@NonNull ThreadType threadType) {
+        super(threadType);
+        mName = generationGroupName();
     }
 
     /**
@@ -94,9 +105,20 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
      * @param name      任务组名称
      * @param taskParam 任务参数
      */
-    public AbstractGroupTaskStep(String name, @NonNull ITaskParam taskParam) {
+    public AbstractGroupTaskStep(@NonNull String name, @NonNull ITaskParam taskParam) {
         mName = name;
         setTaskParam(taskParam);
+    }
+
+    /**
+     * 构造方法
+     *
+     * @param name       任务组名称
+     * @param threadType 线程类型
+     */
+    public AbstractGroupTaskStep(@NonNull String name, @NonNull ThreadType threadType) {
+        super(threadType);
+        mName = name;
     }
 
     @Override
@@ -122,6 +144,12 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
     public AbstractGroupTaskStep setTaskParam(@NonNull ITaskParam taskParam) {
         super.setTaskParam(taskParam);
         mResult.updateParam(taskParam);
+        return this;
+    }
+
+    @Override
+    public AbstractGroupTaskStep setThreadType(@NonNull ThreadType threadType) {
+        super.setThreadType(threadType);
         return this;
     }
 
@@ -191,5 +219,15 @@ public abstract class AbstractGroupTaskStep extends AbstractTaskStep implements 
     @Override
     protected String getTaskLogName() {
         return "Group task step [" + getName() + "]";
+    }
+
+    /**
+     * 自动生成组名
+     *
+     * @return 组名
+     */
+    @NonNull
+    private String generationGroupName() {
+        return "GroupTaskStep-" + GROUP_TASK_NUMBER.getAndIncrement();
     }
 }

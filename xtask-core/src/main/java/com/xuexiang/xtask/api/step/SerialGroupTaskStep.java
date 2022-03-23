@@ -19,6 +19,7 @@ package com.xuexiang.xtask.api.step;
 
 import androidx.annotation.NonNull;
 
+import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.step.ITaskStep;
@@ -49,20 +50,38 @@ public class SerialGroupTaskStep extends AbstractGroupTaskStep {
      * @param name 任务组名称
      * @return 串行任务组
      */
-    public static SerialGroupTaskStep get(String name) {
+    public static SerialGroupTaskStep get(@NonNull String name) {
         return new SerialGroupTaskStep(name);
+    }
+
+    /**
+     * 获取串行任务组
+     *
+     * @param threadType 线程类型
+     * @return 串行任务组
+     */
+    public static SerialGroupTaskStep get(@NonNull ThreadType threadType) {
+        return new SerialGroupTaskStep(threadType);
     }
 
     public SerialGroupTaskStep() {
         super();
     }
 
-    public SerialGroupTaskStep(String name) {
+    public SerialGroupTaskStep(@NonNull String name) {
         super(name);
     }
 
-    public SerialGroupTaskStep(String name, @NonNull ITaskParam taskParam) {
+    public SerialGroupTaskStep(@NonNull ThreadType threadType) {
+        super(threadType);
+    }
+
+    public SerialGroupTaskStep(@NonNull String name, @NonNull ITaskParam taskParam) {
         super(name, taskParam);
+    }
+
+    public SerialGroupTaskStep(@NonNull String name, @NonNull ThreadType threadType) {
+        super(name, threadType);
     }
 
     @Override

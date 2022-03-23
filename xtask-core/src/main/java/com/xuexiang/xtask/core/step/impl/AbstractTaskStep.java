@@ -45,19 +45,19 @@ public abstract class AbstractTaskStep implements ITaskStep {
     /**
      * 是否正在等待
      */
-    private AtomicBoolean mIsPending = new AtomicBoolean(true);
+    private final AtomicBoolean mIsPending = new AtomicBoolean(true);
     /**
      * 是否正在运行
      */
-    private AtomicBoolean mIsRunning = new AtomicBoolean(false);
+    private final AtomicBoolean mIsRunning = new AtomicBoolean(false);
     /**
      * 是否取消
      */
-    private AtomicBoolean mIsCancelled = new AtomicBoolean(false);
+    private final AtomicBoolean mIsCancelled = new AtomicBoolean(false);
     /**
      * 是否已经通知执行结果
      */
-    private AtomicBoolean mIsNotified = new AtomicBoolean(false);
+    private final AtomicBoolean mIsNotified = new AtomicBoolean(false);
     /**
      * 任务步骤的生命周期管理
      */

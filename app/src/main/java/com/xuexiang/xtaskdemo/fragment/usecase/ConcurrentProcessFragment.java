@@ -25,6 +25,7 @@ import com.xuexiang.xaop.annotation.SingleClick;
 import com.xuexiang.xpage.annotation.Page;
 import com.xuexiang.xtask.XTask;
 import com.xuexiang.xtask.core.ITaskChainEngine;
+import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.param.impl.TaskParam;
 import com.xuexiang.xtask.core.step.impl.TaskChainCallbackAdapter;
@@ -33,7 +34,11 @@ import com.xuexiang.xtaskdemo.core.BaseFragment;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.processor.AbstractProcessor;
 import com.xuexiang.xtaskdemo.fragment.usecase.business.task.ProductTaskConstants;
 import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.BriefInfo;
+import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.FactoryInfo;
+import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.PriceInfo;
 import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.Product;
+import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.PromotionInfo;
+import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.entity.RichInfo;
 import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.processor.GetBriefInfoProcessor;
 import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.processor.GetFactoryInfoProcessor;
 import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.processor.GetPriceInfoProcessor;
@@ -46,6 +51,8 @@ import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.task.GetPromotionInfoT
 import com.xuexiang.xtaskdemo.fragment.usecase.concurrent.task.GetRichInfoTask;
 import com.xuexiang.xui.widget.textview.LoggerTextView;
 import com.xuexiang.xutil.system.AppExecutors;
+
+import java.util.concurrent.CountDownLatch;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -96,15 +103,16 @@ public class ConcurrentProcessFragment extends BaseFragment {
     public void onViewClicked(View view) {
         clearLog();
         log("开始查询商品信息...");
+        final long startTime = System.currentTimeMillis();
         switch (view.getId()) {
             case R.id.btn_normal:
-                queryInfoNormal(productId);
+                queryInfoNormal(startTime, productId);
                 break;
             case R.id.btn_rxjava:
-                queryInfoRxJava(productId);
+                queryInfoRxJava(startTime, productId);
                 break;
             case R.id.btn_xtask:
-                queryInfoXTask(productId);
+                queryInfoXTask(startTime, productId);
                 break;
             default:
                 break;
@@ -115,14 +123,61 @@ public class ConcurrentProcessFragment extends BaseFragment {
     /**
      * 普通的接口回调写法, 这里仅是演示模拟，实际的可能更复杂
      */
-    private void queryInfoNormal(String productId) {
+    private void queryInfoNormal(final long startTime, String productId) {
         AppExecutors.get().singleIO().execute(() -> {
             new GetBriefInfoProcessor(logger, productId).setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<BriefInfo>() {
                 @Override
                 public void onSuccess(BriefInfo briefInfo) {
-                    Product product = new Product(briefInfo);
-                    new GetFactoryInfoProcessor(logger, product.getFactoryId()).process();
+                    final Product product = new Product(briefInfo);
+                    CountDownLatch latch = new CountDownLatch(4);
 
+                    // 2.1 获取商品的生产信息
+                    AppExecutors.get().networkIO().execute(() -> {
+                        new GetFactoryInfoProcessor(logger, product.getFactoryId()).setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<FactoryInfo>() {
+                            @Override
+                            public void onSuccess(FactoryInfo result) {
+                                product.setFactory(result);
+                                latch.countDown();
+                            }
+                        }).process();
+                    });
+                    // 2.2 获取商品的价格信息
+                    AppExecutors.get().networkIO().execute(() -> {
+                        new GetPriceInfoProcessor(logger, product.getPriceId()).setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<PriceInfo>() {
+                            @Override
+                            public void onSuccess(PriceInfo result) {
+                                product.setPrice(result);
+                                latch.countDown();
+                            }
+                        }).process();
+                    });
+                    // 2.3 获取商品的促销信息
+                    AppExecutors.get().networkIO().execute(() -> {
+                        new GetPromotionInfoProcessor(logger, product.getPromotionId()).setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<PromotionInfo>() {
+                            @Override
+                            public void onSuccess(PromotionInfo result) {
+                                product.setPromotion(result);
+                                latch.countDown();
+                            }
+                        }).process();
+                    });
+                    // 2.4 获取商品的富文本信息
+                    AppExecutors.get().networkIO().execute(() -> {
+                        new GetRichInfoProcessor(logger, product.getRichId()).setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<RichInfo>() {
+                            @Override
+                            public void onSuccess(RichInfo result) {
+                                product.setRich(result);
+                                latch.countDown();
+                            }
+                        }).process();
+                    });
+                    try {
+                        latch.await();
+                        log("总共耗时:" + (System.currentTimeMillis() - startTime) + "ms");
+                        log("查询商品信息完成, " + product);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }).process();
         });
@@ -131,7 +186,7 @@ public class ConcurrentProcessFragment extends BaseFragment {
     /**
      * RxJava写法, 这里仅是演示模拟，实际的可能更复杂
      */
-    private void queryInfoRxJava(String productId) {
+    private void queryInfoRxJava(final long startTime, String productId) {
         disposable = Observable.just(productId)
                 // 1.获取商品简要信息
                 .map(id -> new GetBriefInfoProcessor(logger, id).process())
@@ -153,18 +208,21 @@ public class ConcurrentProcessFragment extends BaseFragment {
                 )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(product -> log("查询商品信息完成, " + product));
+                .subscribe(product -> {
+                    log("总共耗时:" + (System.currentTimeMillis() - startTime) + "ms");
+                    log("查询商品信息完成, " + product);
+                });
     }
 
     /**
      * XTask写法, 这里仅是演示模拟，实际的可能更复杂
      */
-    private void queryInfoXTask(String productId) {
+    private void queryInfoXTask(final long startTime, String productId) {
         XTask.getTaskChain()
                 .setTaskParam(TaskParam.get(ProductTaskConstants.KEY_PRODUCT_ID, productId))
                 // 1.获取商品简要信息
                 .addTask(new GetBriefInfoTask(logger))
-                .addTask(XTask.getConcurrentGroupTask()
+                .addTask(XTask.getConcurrentGroupTask(ThreadType.SYNC)
                         // 2.1 获取商品的生产信息
                         .addTask(new GetFactoryInfoTask(logger))
                         // 2.2 获取商品的价格信息
@@ -176,6 +234,7 @@ public class ConcurrentProcessFragment extends BaseFragment {
                 .setTaskChainCallback(new TaskChainCallbackAdapter() {
                     @Override
                     public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                        log("总共耗时:" + (System.currentTimeMillis() - startTime) + "ms");
                         Product product = result.getDataStore().getObject(ProductTaskConstants.KEY_PRODUCT, Product.class);
                         log("查询商品信息完成, " + product);
                     }

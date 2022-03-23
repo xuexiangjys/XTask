@@ -19,6 +19,7 @@ package com.xuexiang.xtask.api.step;
 
 import androidx.annotation.NonNull;
 
+import com.xuexiang.xtask.core.ThreadType;
 import com.xuexiang.xtask.core.param.ITaskParam;
 import com.xuexiang.xtask.core.param.ITaskResult;
 import com.xuexiang.xtask.core.step.ITaskStep;
@@ -49,20 +50,38 @@ public class ConcurrentGroupTaskStep extends AbstractGroupTaskStep {
      * @param name 任务组名称
      * @return 并行任务组
      */
-    public static ConcurrentGroupTaskStep get(String name) {
+    public static ConcurrentGroupTaskStep get(@NonNull String name) {
         return new ConcurrentGroupTaskStep(name);
+    }
+
+    /**
+     * 获取并行任务组
+     *
+     * @param threadType 线程类型
+     * @return 并行任务组
+     */
+    public static ConcurrentGroupTaskStep get(@NonNull ThreadType threadType) {
+        return new ConcurrentGroupTaskStep(threadType);
     }
 
     public ConcurrentGroupTaskStep() {
         super();
     }
 
-    public ConcurrentGroupTaskStep(String name) {
+    public ConcurrentGroupTaskStep(@NonNull String name) {
         super(name);
     }
 
-    public ConcurrentGroupTaskStep(String name, @NonNull ITaskParam taskParam) {
+    public ConcurrentGroupTaskStep(@NonNull ThreadType threadType) {
+        super(threadType);
+    }
+
+    public ConcurrentGroupTaskStep(@NonNull String name, @NonNull ITaskParam taskParam) {
         super(name, taskParam);
+    }
+
+    public ConcurrentGroupTaskStep(@NonNull String name, @NonNull ThreadType threadType) {
+        super(name, threadType);
     }
 
     @Override

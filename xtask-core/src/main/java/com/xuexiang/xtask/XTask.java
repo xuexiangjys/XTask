@@ -190,8 +190,18 @@ public final class XTask {
      * @param name 任务组名称
      * @return 并行任务组
      */
-    public static ConcurrentGroupTaskStep getConcurrentGroupTask(String name) {
+    public static ConcurrentGroupTaskStep getConcurrentGroupTask(@NonNull String name) {
         return ConcurrentGroupTaskStep.get(name);
+    }
+
+    /**
+     * 获取并行任务组
+     *
+     * @param threadType 线程类型
+     * @return 并行任务组
+     */
+    public static ConcurrentGroupTaskStep getConcurrentGroupTask(@NonNull ThreadType threadType) {
+        return ConcurrentGroupTaskStep.get(threadType);
     }
 
     //========================SerialGroupTaskStep===============================//
@@ -211,8 +221,18 @@ public final class XTask {
      * @param name 任务组名称
      * @return 串行任务组
      */
-    public static SerialGroupTaskStep getSerialGroupTask(String name) {
+    public static SerialGroupTaskStep getSerialGroupTask(@NonNull String name) {
         return SerialGroupTaskStep.get(name);
+    }
+
+    /**
+     * 获取串行任务组
+     *
+     * @param threadType 任务组名称
+     * @return 串行任务组
+     */
+    public static SerialGroupTaskStep getSerialGroupTask(@NonNull ThreadType threadType) {
+        return SerialGroupTaskStep.get(threadType);
     }
 
     //========================CancellerPoolUtils===============================//

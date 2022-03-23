@@ -88,15 +88,16 @@ public class ComplexBusinessFragment extends BaseFragment {
     public void onViewClicked(View view) {
         clearLog();
         log("开始仿冒生产网红产品...");
+        final long startTime = System.currentTimeMillis();
         switch (view.getId()) {
             case R.id.btn_normal:
-                doBusinessNormal();
+                doBusinessNormal(startTime);
                 break;
             case R.id.btn_rxjava:
-                doBusinessRxJava();
+                doBusinessRxJava(startTime);
                 break;
             case R.id.btn_xtask:
-                doBusinessXTask();
+                doBusinessXTask(startTime);
                 break;
             default:
                 break;
@@ -108,7 +109,7 @@ public class ComplexBusinessFragment extends BaseFragment {
      * 流程如下：
      * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
      */
-    private void doBusinessNormal() {
+    private void doBusinessNormal(final long startTime) {
         AppExecutors.get().singleIO().execute(() -> {
             // 1.获取产品信息
             new GetProductInfoProcessor(logger, productId).setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<ProductInfo>() {
@@ -130,6 +131,7 @@ public class ComplexBusinessFragment extends BaseFragment {
                                     publicProductProcessor.setProcessorCallback(new AbstractProcessor.ProcessorCallbackAdapter<Product>() {
                                         @Override
                                         public void onSuccess(Product product) {
+                                            log("总共耗时:" + (System.currentTimeMillis() - startTime) + "ms");
                                             log("仿冒生产网红产品完成, " + product);
                                         }
                                     }).process();
@@ -148,7 +150,7 @@ public class ComplexBusinessFragment extends BaseFragment {
      * 流程如下：
      * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
      */
-    private void doBusinessRxJava() {
+    private void doBusinessRxJava(final long startTime) {
         disposable = Observable.just(productId)
                 // 1.获取产品信息
                 .map(id -> new GetProductInfoProcessor(logger, id).process())
@@ -165,7 +167,10 @@ public class ComplexBusinessFragment extends BaseFragment {
                 .map(product -> new PublicProductProcessor(logger, product).process())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(product -> log("仿冒生产网红产品完成, " + product));
+                .subscribe(product -> {
+                    log("总共耗时:" + (System.currentTimeMillis() - startTime) + "ms");
+                    log("仿冒生产网红产品完成, " + product);
+                });
     }
 
 
@@ -174,7 +179,7 @@ public class ComplexBusinessFragment extends BaseFragment {
      * 流程如下：
      * 1.获取产品信息 -> 2.查询可生产的工厂 -> 3.联系工厂生产产品 -> 4.送去市场部门评估售价 -> 5.产品上市
      */
-    private void doBusinessXTask() {
+    private void doBusinessXTask(final long startTime) {
         XTask.getTaskChain()
                 .setTaskParam(TaskParam.get(ProductTaskConstants.KEY_PRODUCT_ID, productId))
                 // 1.获取产品信息
@@ -188,6 +193,7 @@ public class ComplexBusinessFragment extends BaseFragment {
                 .setTaskChainCallback(new TaskChainCallbackAdapter() {
                     @Override
                     public void onTaskChainCompleted(@NonNull ITaskChainEngine engine, @NonNull ITaskResult result) {
+                        log("总共耗时:" + (System.currentTimeMillis() - startTime) + "ms");
                         Product product = result.getDataStore().getObject(ProductTaskConstants.KEY_PRODUCT, Product.class);
                         log("仿冒生产网红产品完成, " + product);
                     }
