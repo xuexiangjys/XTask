@@ -84,7 +84,7 @@ allprojects {
 dependencies {
   ...
   // XTask
-  implementation 'com.github.xuexiangjys:XTask:xtask-core:1.0.1'
+  implementation 'com.github.xuexiangjys:XTask:xtask-core:1.0.2'
 }
 ```
 
