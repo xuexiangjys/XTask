@@ -48,7 +48,7 @@ public class XTaskExecutor implements IPriorityExecutorCore, ICategoryExecutorCo
      */
     private ICategoryExecutorCore mCategoryExecutorCore;
     /**
-     * 分类执行内核实现接口
+     * 周期执行内核实现接口
      */
     private IScheduledExecutorCore mScheduledExecutorCore;
 
